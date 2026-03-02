@@ -19,11 +19,14 @@ const StudentLayout = ({ children }: StudentLayoutProps) => {
 
       {/* Main Content */}
       <main
-        className={`pt-16 transition-all duration-300 ${
+        className={`transition-all duration-300 ${
           isCollapsed ? 'ml-20' : 'ml-72'
         }`}
       >
-        <div className="p-6 md:p-10">{children}</div>
+        <div className="px-6 md:px-10 py-6">
+          {/* Render the page-specific children */}
+          {children}
+        </div>
       </main>
     </div>
   );

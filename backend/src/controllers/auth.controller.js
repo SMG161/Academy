@@ -1,17 +1,13 @@
-const {
-  createUser,
-  findUserByEmailOrUsername,
-  findUserByEmail,
-} = require('../models/User.model');
+const User = require('../models/User.model');
 const { hashPassword, comparePassword } = require('../utils/hash');
 const { signToken } = require('../utils/jwt');
 
 function sanitizeUser(user) {
   if (!user) return null;
-  // Remove sensitive fields
-  // eslint-disable-next-line no-unused-vars
-  const { passwordHash, ...safeUser } = user;
-  return safeUser;
+
+  const userObj = user.toObject();
+  delete userObj.passwordHash;
+  return userObj;
 }
 
 async function signup(req, res) {
@@ -19,32 +15,34 @@ async function signup(req, res) {
     const { email, username, password, confirmPassword } = req.body;
 
     if (!email || !password || !confirmPassword) {
-      return res
-        .status(400)
-        .json({ message: 'Email, password and confirm password are required.' });
+      return res.status(400).json({
+        message: 'Email, password and confirm password are required.',
+      });
     }
 
     if (password !== confirmPassword) {
       return res.status(400).json({ message: 'Passwords do not match.' });
     }
 
-    const existingByEmail = await findUserByEmail(email);
+    const existingByEmail = await User.findOne({
+      email: email.toLowerCase(),
+    });
+
     if (existingByEmail) {
       return res.status(409).json({ message: 'Email is already registered.' });
     }
 
     if (username) {
-      const existingByUsername = await findUserByEmailOrUsername(username);
+      const existingByUsername = await User.findOne({ username });
+
       if (existingByUsername) {
-        return res
-          .status(409)
-          .json({ message: 'Username is already taken.' });
+        return res.status(409).json({ message: 'Username is already taken.' });
       }
     }
 
     const passwordHash = await hashPassword(password);
 
-    const newUser = await createUser({
+    const newUser = await User.create({
       email,
       username,
       passwordHash,
@@ -55,7 +53,7 @@ async function signup(req, res) {
       email: newUser.email,
     });
 
-    console.log("Signed up successfully", newUser);
+    console.log('Signed up successfully', newUser);
 
     return res.status(201).json({
       message: 'User registered successfully',
@@ -63,15 +61,14 @@ async function signup(req, res) {
       token,
     });
   } catch (error) {
-    // Handle duplicate key errors defensively
-    if (error && error.code === 11000) {
-      const field = Object.keys(error.keyPattern || {})[0] || 'field';
+    // Handle duplicate key error (just in case)
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern || {})[0];
       return res.status(409).json({
-        message: `${field.charAt(0).toUpperCase() + field.slice(1)} already in use.`,
+        message: `${field} already in use.`,
       });
     }
 
-    // eslint-disable-next-line no-console
     console.error('Signup error:', error);
     return res.status(500).json({ message: 'Internal server error' });
   }
@@ -82,15 +79,20 @@ async function signin(req, res) {
     const { emailOrUsername, password } = req.body;
 
     if (!emailOrUsername || !password) {
-      return res
-        .status(400)
-        .json({ message: 'Email/username and password are required.' });
+      return res.status(400).json({
+        message: 'Email/username and password are required.',
+      });
     }
 
-    const user = await findUserByEmailOrUsername(emailOrUsername);
+    const user = await User.findOne({
+      $or: [
+        { email: emailOrUsername.toLowerCase() },
+        { username: emailOrUsername },
+      ],
+    });
 
     if (!user) {
-      return res.status(401).json({ message: 'Invalid credentials.' });
+      return res.status(401).json({ message: 'User not found.' });
     }
 
     const isMatch = await comparePassword(password, user.passwordHash);
@@ -104,7 +106,7 @@ async function signin(req, res) {
       email: user.email,
     });
 
-    console.log("Signed in successfully", user);
+    console.log('Signed in successfully', user);
 
     return res.status(200).json({
       message: 'Signed in successfully',
@@ -112,7 +114,6 @@ async function signin(req, res) {
       token,
     });
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error('Signin error:', error);
     return res.status(500).json({ message: 'Internal server error' });
   }
@@ -122,5 +123,3 @@ module.exports = {
   signup,
   signin,
 };
-
-
