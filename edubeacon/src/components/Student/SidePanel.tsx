@@ -45,9 +45,13 @@ const SidePanel = ({ isCollapsed }: SidePanelProps) => {
 
   return (
     <aside
-      className={`flex h-screen ${widthClass} flex-col justify-between rounded-r-3xl bg-gradient-to-b from-gray-900/95 via-black/95 to-black/95 text-gray-200 shadow-2xl border border-white/5 border-l-transparent`}
+      className={`fixed left-0 top-16 z-40 ${widthClass} h-[calc(100vh-4rem)]
+      flex flex-col justify-between rounded-r-3xl
+      bg-gradient-to-b from-gray-900/95 via-black/95 to-black/95
+      text-gray-200 shadow-2xl border border-white/5 border-l-transparent
+      transition-all duration-300`}
     >
-      {/* Middle navigation */}
+      {/* Navigation */}
       <nav className="flex-1 px-2 pt-6 pb-4">
         <div className="flex h-full flex-col items-stretch gap-2">
           {navItems.map((item) => {
@@ -68,7 +72,7 @@ const SidePanel = ({ isCollapsed }: SidePanelProps) => {
                 } ${isCollapsed ? 'justify-center' : ''}`}
               >
                 <span
-                  className={`flex h-9 w-9 items-center justify-center rounded-2xl bg-white/5 text-purple-200 shadow-sm shadow-black/40 group-hover:bg-white/10 ${
+                  className={`flex h-9 w-9 items-center justify-center rounded-2xl bg-white/5 text-purple-200 shadow-sm group-hover:bg-white/10 ${
                     isActive ? 'bg-purple-500/30 text-purple-50' : ''
                   }`}
                 >
@@ -81,7 +85,7 @@ const SidePanel = ({ isCollapsed }: SidePanelProps) => {
         </div>
       </nav>
 
-      {/* Bottom account area */}
+      {/* Bottom Section */}
       <div className="px-3 pb-4 pt-3">
         <button
           type="button"
@@ -89,11 +93,12 @@ const SidePanel = ({ isCollapsed }: SidePanelProps) => {
             isCollapsed ? 'justify-center' : ''
           }`}
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-white/5 text-gray-300">
+          <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-white/5">
             <Cog6ToothIcon className="h-5 w-5" />
           </span>
           {!isCollapsed && <span>Account settings</span>}
         </button>
+
         <button
           type="button"
           onClick={handleLogout}
@@ -112,5 +117,3 @@ const SidePanel = ({ isCollapsed }: SidePanelProps) => {
 };
 
 export default SidePanel;
-
-
