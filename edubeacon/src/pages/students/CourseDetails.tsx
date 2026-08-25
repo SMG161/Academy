@@ -15,6 +15,7 @@ const CourseDetails = () => {
   const [course, setCourse] = useState<Course | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const { user } = useCurrentUser();
   const isEnrolled = Boolean(user?.courses?.some((c) => c._id === id));
 
@@ -41,6 +42,31 @@ const CourseDetails = () => {
     fetchCourse();
   }, [id]);
 
+  useEffect(() => {
+    if (!isEnrolled || !id) return;
+
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+
+    const fetchVideoUrl = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/courses/${id}/video`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) throw new Error(data.message || 'Failed to fetch video');
+
+        setVideoUrl(data.videoUrl);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Something went wrong';
+        setError(message);
+      }
+    };
+
+    fetchVideoUrl();
+  }, [isEnrolled, id]);
+
   if (isLoading) return <p className="text-gray-600 p-6">Loading course...</p>;
   if (error) return <p className="text-red-600 p-6">{error}</p>;
   if (!course) return <p className="text-gray-600 p-6">Course not found.</p>;
@@ -58,17 +84,21 @@ const CourseDetails = () => {
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Video Player */}
             <div className="flex-1">
-              <MediaPlayer
-                title={course.name}
-                src={`${API_BASE_URL}/${course.videoPath.replace(/^\//, '')}`}
-                viewType="video"
-                streamType="on-demand"
-                playsInline
-                className="w-full h-80 lg:h-[450px] rounded-lg overflow-hidden shadow-2xl"
-              >
-                <MediaProvider />
-                <DefaultVideoLayout icons={defaultLayoutIcons} />
-              </MediaPlayer>
+              {videoUrl ? (
+                <MediaPlayer
+                  title={course.name}
+                  src={videoUrl}
+                  viewType="video"
+                  streamType="on-demand"
+                  playsInline
+                  className="w-full h-80 lg:h-[450px] rounded-lg overflow-hidden shadow-2xl"
+                >
+                  <MediaProvider />
+                  <DefaultVideoLayout icons={defaultLayoutIcons} />
+                </MediaPlayer>
+              ) : (
+                <div className="w-full h-80 lg:h-[450px] rounded-lg bg-gray-200 animate-pulse" />
+              )}
             </div>
 
             {/* Info Panel */}
