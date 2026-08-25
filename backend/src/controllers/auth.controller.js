@@ -1,6 +1,16 @@
 const User = require('../models/User.model');
+const Student = require('../models/Student.model');
 const { hashPassword, comparePassword } = require('../utils/hash');
 const { signToken } = require('../utils/jwt');
+
+// Add an entry here for each new role (e.g. teacher, admin) as its model is created.
+const ROLE_MODELS = {
+  student: Student,
+};
+
+const ROLE_DEFAULTS = {
+  student: { courses: [] },
+};
 
 function sanitizeUser(user) {
   if (!user) return null;
@@ -12,7 +22,7 @@ function sanitizeUser(user) {
 
 async function signup(req, res) {
   try {
-    const { email, username, password, confirmPassword } = req.body;
+    const { email, username, password, confirmPassword, role = 'student' } = req.body;
 
     if (!email || !password || !confirmPassword) {
       return res.status(400).json({
@@ -22,6 +32,12 @@ async function signup(req, res) {
 
     if (password !== confirmPassword) {
       return res.status(400).json({ message: 'Passwords do not match.' });
+    }
+
+    const RoleModel = ROLE_MODELS[role];
+
+    if (!RoleModel) {
+      return res.status(400).json({ message: `Invalid role: ${role}` });
     }
 
     const existingByEmail = await User.findOne({
@@ -42,15 +58,17 @@ async function signup(req, res) {
 
     const passwordHash = await hashPassword(password);
 
-    const newUser = await User.create({
+    const newUser = await RoleModel.create({
       email,
       username,
       passwordHash,
+      ...(ROLE_DEFAULTS[role] || {}),
     });
 
     const token = signToken({
       userId: newUser._id.toString(),
       email: newUser.email,
+      role: newUser.role,
     });
 
     console.log('Signed up successfully', newUser);
@@ -61,7 +79,6 @@ async function signup(req, res) {
       token,
     });
   } catch (error) {
-    // Handle duplicate key error (just in case)
     if (error.code === 11000) {
       const field = Object.keys(error.keyPattern || {})[0];
       return res.status(409).json({
@@ -101,9 +118,14 @@ async function signin(req, res) {
       return res.status(401).json({ message: 'Invalid credentials.' });
     }
 
+    if (user.role === 'student') {
+      await user.populate('courses');
+    }
+
     const token = signToken({
       userId: user._id.toString(),
       email: user.email,
+      role: user.role,
     });
 
     console.log('Signed in successfully', user);

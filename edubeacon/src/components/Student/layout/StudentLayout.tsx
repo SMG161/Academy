@@ -19,7 +19,7 @@ const StudentLayout = ({ children }: StudentLayoutProps) => {
 
       {/* Main Content */}
       <main
-        className={`transition-all duration-300 ${
+        className={`pt-16 transition-all duration-300 ${
           isCollapsed ? 'ml-20' : 'ml-72'
         }`}
       >

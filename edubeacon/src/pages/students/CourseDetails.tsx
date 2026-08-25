@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { MediaPlayer, MediaProvider } from '@vidstack/react';
+import { DefaultVideoLayout, defaultLayoutIcons } from '@vidstack/react/player/layouts/default';
+import '@vidstack/react/player/styles/default/theme.css';
+import '@vidstack/react/player/styles/default/layouts/video.css';
 import StudentLayout from '../../components/Student/layout/StudentLayout';
-
-interface Course {
-  _id: string;
-  name: string;
-  teacher?: { name: string } | null;
-  videoPath: string;
-  description?: string;
-}
+import { useCurrentUser } from '../../hooks/useCurrentUser';
+import type { Course } from '../../types/course';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
@@ -17,6 +15,8 @@ const CourseDetails = () => {
   const [course, setCourse] = useState<Course | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useCurrentUser();
+  const isEnrolled = Boolean(user?.courses?.some((c) => c._id === id));
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -53,36 +53,52 @@ const CourseDetails = () => {
           {course.name}
         </h1>
 
-        {/* Video + Info Panel */}
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Video Player */}
-          <div className="flex-1">
-            <video
-              src={`http://localhost:3000/${course.videoPath}`} // adjust if using static route like /videos
-              controls
-              autoPlay={false}
-              className="w-full h-80 lg:h-[450px] rounded-lg shadow-2xl object-cover"
-            />
+        {isEnrolled ? (
+          /* Video + Info Panel */
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Video Player */}
+            <div className="flex-1">
+              <MediaPlayer
+                title={course.name}
+                src={`${API_BASE_URL}/${course.videoPath.replace(/^\//, '')}`}
+                viewType="video"
+                streamType="on-demand"
+                playsInline
+                className="w-full h-80 lg:h-[450px] rounded-lg overflow-hidden shadow-2xl"
+              >
+                <MediaProvider />
+                <DefaultVideoLayout icons={defaultLayoutIcons} />
+              </MediaPlayer>
+            </div>
+
+            {/* Info Panel */}
+            <div className="w-full lg:w-72 bg-white rounded-xl shadow-md p-6 flex flex-col gap-4">
+              <h2 className="text-lg font-semibold text-gray-700">
+                Teacher
+              </h2>
+              <p className="text-gray-900 text-base">
+                {course.teacher?.name || 'Unidentified teacher'}
+              </p>
+
+              <h2 className="text-lg font-semibold text-gray-700 mt-4">
+                Description
+              </h2>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                {course.description ||
+                  'This course contains high-quality lectures and resources designed to help you improve your skills and knowledge in the subject. Follow along and complete the exercises to get the most out of this course.'}
+              </p>
+            </div>
           </div>
-
-          {/* Info Panel */}
-          <div className="w-full lg:w-72 bg-white rounded-xl shadow-md p-6 flex flex-col gap-4">
-            <h2 className="text-lg font-semibold text-gray-700">
-              Teacher
-            </h2>
-            <p className="text-gray-900 text-base">
-              {course.teacher?.name || 'Unidentified teacher'}
-            </p>
-
-            <h2 className="text-lg font-semibold text-gray-700 mt-4">
-              Description
-            </h2>
+        ) : (
+          /* Description only — no access to this course yet */
+          <div className="w-full bg-white rounded-xl shadow-md p-6">
+            <h2 className="text-lg font-semibold text-gray-700 mb-2">Description</h2>
             <p className="text-gray-600 text-sm leading-relaxed">
               {course.description ||
                 'This course contains high-quality lectures and resources designed to help you improve your skills and knowledge in the subject. Follow along and complete the exercises to get the most out of this course.'}
             </p>
           </div>
-        </div>
+        )}
       </div>
     </StudentLayout>
   );

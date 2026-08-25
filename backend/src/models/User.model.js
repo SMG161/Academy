@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema(
     username: { type: String, unique: true, sparse: true, trim: true },
     passwordHash: { type: String, required: true },
   },
-  { timestamps: true }
+  { timestamps: true, discriminatorKey: 'role' }
 );
 
 module.exports = mongoose.model('User', userSchema);
