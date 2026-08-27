@@ -7,6 +7,7 @@ const authMiddleware = require('../middleware/authMiddleware');
 // Protected
 router.post('/', authMiddleware, courseController.createCourse);
 router.delete('/:id', authMiddleware, courseController.deleteCourse);
+router.get('/:id/access', authMiddleware, courseController.getCourseAccess);
 
 // Public
 router.get('/', courseController.getAllCourses);

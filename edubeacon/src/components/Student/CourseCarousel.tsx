@@ -13,9 +13,15 @@ interface CourseCarouselProps {
   title: ReactNode;
   courses: CarouselItem[];
   linkBase?: string;
+  viewAllPath?: string;
 }
 
-const CourseCarousel = ({ title, courses, linkBase = '/student/course' }: CourseCarouselProps) => {
+const CourseCarousel = ({
+  title,
+  courses,
+  linkBase = '/student/course',
+  viewAllPath,
+}: CourseCarouselProps) => {
   const navigate = useNavigate();
 
   const handleCourseClick = (id: string) => {
@@ -24,7 +30,19 @@ const CourseCarousel = ({ title, courses, linkBase = '/student/course' }: Course
 
   return (
     <section className="pb-12 px-4 bg-gray-50">
-      <h2 className="text-4xl lg:text-5xl font-bold leading-tight mb-6">{title}</h2>
+      <div className="flex items-center justify-between gap-4 mb-6">
+        <h2 className="text-4xl lg:text-5xl font-bold leading-tight">{title}</h2>
+
+        {viewAllPath && (
+          <button
+            type="button"
+            onClick={() => navigate(viewAllPath)}
+            className="flex-shrink-0 text-purple-600 text-sm font-semibold hover:text-purple-700 transition-colors"
+          >
+            View all →
+          </button>
+        )}
+      </div>
 
       <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
         {courses.length === 0 && (

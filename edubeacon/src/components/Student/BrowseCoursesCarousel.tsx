@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import CourseCarousel from './CourseCarousel';
 import type { Course } from '../../types/course';
+import type { Paginated } from '../../types/pagination';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
@@ -15,7 +16,7 @@ const BrowseCoursesCarousel = () => {
       setError(null);
 
       try {
-        const res = await fetch(`${API_BASE_URL}/api/courses`, {
+        const res = await fetch(`${API_BASE_URL}/api/courses?page=1&limit=10`, {
           headers: {
             'Content-Type': 'application/json',
           },
@@ -25,7 +26,8 @@ const BrowseCoursesCarousel = () => {
 
         if (!res.ok) throw new Error(data.message || 'Failed to fetch courses');
 
-        setCourses(data);
+        const paginated = data as Paginated<Course>;
+        setCourses(paginated.items);
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Something went wrong';
         setError(message);
@@ -49,6 +51,7 @@ const BrowseCoursesCarousel = () => {
         </>
       }
       courses={courses}
+      viewAllPath="/student/browse-courses"
     />
   );
 };

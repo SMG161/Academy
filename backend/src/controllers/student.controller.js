@@ -1,4 +1,7 @@
 const Student = require('../models/Student.model');
+const Course = require('../models/Course.model');
+const Lecture = require('../models/Lecture.model');
+const { getPagination, buildPagination } = require('../utils/pagination');
 
 function sanitizeUser(user) {
   if (!user) return null;
@@ -8,21 +11,12 @@ function sanitizeUser(user) {
   return userObj;
 }
 
-// Get the currently signed-in student, with enrolled courses and
-// individually-purchased lectures populated (videoPath excluded — playback
-// URLs are only issued via the signed video endpoints).
+// Get the currently signed-in student's basic profile. Course/lecture access
+// checks and listings live behind their own (paginated / dedicated) endpoints
+// so this stays cheap regardless of how many courses or lectures a student owns.
 exports.getMe = async (req, res) => {
   try {
-    const student = await Student.findById(req.user.userId)
-      .populate('courses')
-      .populate({
-        path: 'lectures',
-        select: '-videoPath',
-        populate: [
-          { path: 'teacher', select: 'name' },
-          { path: 'course', select: 'name' },
-        ],
-      });
+    const student = await Student.findById(req.user.userId);
 
     if (!student) {
       return res.status(404).json({ message: 'Student not found.' });
@@ -31,6 +25,70 @@ exports.getMe = async (req, res) => {
     return res.status(200).json({ user: sanitizeUser(student) });
   } catch (error) {
     console.error('Get student error:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Paginated list of courses the student is enrolled in.
+exports.getMyCourses = async (req, res) => {
+  try {
+    const { page, limit, skip } = getPagination(req, { defaultLimit: 10, maxLimit: 50 });
+
+    const student = await Student.findById(req.user.userId).select('courses');
+
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found.' });
+    }
+
+    const filter = { _id: { $in: student.courses } };
+
+    const [courses, total] = await Promise.all([
+      Course.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate('lectures', 'name price'),
+      Course.countDocuments(filter),
+    ]);
+
+    return res.status(200).json({ items: courses, pagination: buildPagination({ page, limit, total }) });
+  } catch (error) {
+    console.error('Get my courses error:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Paginated list of lectures the student bought individually, excluding any
+// lecture already covered by a fully-owned course.
+exports.getMyLectures = async (req, res) => {
+  try {
+    const { page, limit, skip } = getPagination(req, { defaultLimit: 10, maxLimit: 50 });
+
+    const student = await Student.findById(req.user.userId).select('courses lectures');
+
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found.' });
+    }
+
+    const filter = {
+      _id: { $in: student.lectures },
+      course: { $nin: student.courses },
+    };
+
+    const [lectures, total] = await Promise.all([
+      Lecture.find(filter)
+        .select('-videoPath')
+        .populate('teacher', 'name')
+        .populate('course', 'name')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Lecture.countDocuments(filter),
+    ]);
+
+    return res.status(200).json({ items: lectures, pagination: buildPagination({ page, limit, total }) });
+  } catch (error) {
+    console.error('Get my lectures error:', error);
     return res.status(500).json({ message: 'Internal server error' });
   }
 };

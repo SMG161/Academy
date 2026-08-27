@@ -5,7 +5,6 @@ import { DefaultVideoLayout, defaultLayoutIcons } from '@vidstack/react/player/l
 import '@vidstack/react/player/styles/default/theme.css';
 import '@vidstack/react/player/styles/default/layouts/video.css';
 import StudentLayout from '../../components/Student/layout/StudentLayout';
-import { useCurrentUser } from '../../hooks/useCurrentUser';
 import type { Lecture } from '../../types/lecture';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
@@ -16,13 +15,7 @@ const LectureDetails = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const { user } = useCurrentUser();
-
-  const hasAccess = Boolean(
-    lecture &&
-      (user?.courses?.some((c) => c._id === lecture.course._id) ||
-        user?.lectures?.some((l) => l._id === lecture._id))
-  );
+  const [hasAccess, setHasAccess] = useState<boolean | null>(null);
 
   useEffect(() => {
     const fetchLecture = async () => {
@@ -45,6 +38,31 @@ const LectureDetails = () => {
     };
 
     fetchLecture();
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) return;
+
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      setHasAccess(false);
+      return;
+    }
+
+    const fetchAccess = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/lectures/${id}/access`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json().catch(() => ({}));
+
+        setHasAccess(res.ok ? Boolean(data.hasAccess) : false);
+      } catch {
+        setHasAccess(false);
+      }
+    };
+
+    fetchAccess();
   }, [id]);
 
   useEffect(() => {
@@ -86,7 +104,9 @@ const LectureDetails = () => {
           <p className="text-gray-500 mt-2">Part of {lecture.course.name}</p>
         </div>
 
-        {hasAccess ? (
+        {hasAccess === null ? (
+          <div className="w-full h-80 lg:h-[450px] rounded-lg bg-gray-200 animate-pulse" />
+        ) : hasAccess ? (
           <div className="flex flex-col lg:flex-row gap-8">
             <div className="flex-1">
               {videoUrl ? (

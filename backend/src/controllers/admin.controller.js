@@ -4,6 +4,7 @@ const Student = require('../models/Student.model');
 const Course = require('../models/Course.model');
 const Lecture = require('../models/Lecture.model');
 const { hashPassword } = require('../utils/hash');
+const { getPagination, buildPagination } = require('../utils/pagination');
 
 function sanitizeUser(user) {
   if (!user) return null;
@@ -47,21 +48,25 @@ exports.createTeacher = async (req, res) => {
 
 exports.getAllTeachers = async (req, res) => {
   try {
-    const teachers = await Teacher.find().sort({ createdAt: -1 });
+    const { page, limit, skip } = getPagination(req, { defaultLimit: 25, maxLimit: 100 });
 
-    const courseCounts = await Course.aggregate([
-      { $match: { teacher: { $ne: null } } },
-      { $group: { _id: '$teacher', count: { $sum: 1 } } },
+    const [teachers, total, courseCounts] = await Promise.all([
+      Teacher.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Teacher.countDocuments(),
+      Course.aggregate([
+        { $match: { teacher: { $ne: null } } },
+        { $group: { _id: '$teacher', count: { $sum: 1 } } },
+      ]),
     ]);
 
     const countMap = new Map(courseCounts.map((c) => [c._id.toString(), c.count]));
 
-    const result = teachers.map((teacher) => ({
+    const items = teachers.map((teacher) => ({
       ...sanitizeUser(teacher),
       numCourses: countMap.get(teacher._id.toString()) || 0,
     }));
 
-    return res.status(200).json(result);
+    return res.status(200).json({ items, pagination: buildPagination({ page, limit, total }) });
   } catch (error) {
     console.error('Get teachers error:', error);
     return res.status(500).json({ message: 'Internal server error' });

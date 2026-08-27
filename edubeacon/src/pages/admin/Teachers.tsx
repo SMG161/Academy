@@ -1,33 +1,42 @@
 import { useCallback, useEffect, useState } from 'react';
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import AdminLayout from '../../components/Admin/AdminLayout';
 import AddTeacherModal from '../../components/Admin/AddTeacherModal';
 import type { Teacher } from '../../types/teacher';
+import type { Pagination } from '../../types/pagination';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+const TEACHERS_PER_PAGE = 25;
 
 const Teachers = () => {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [pagination, setPagination] = useState<Pagination | null>(null);
+  const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const fetchTeachers = useCallback(async () => {
+  const fetchTeachers = useCallback(async (pageToFetch: number) => {
     setIsLoading(true);
     setError(null);
 
     try {
       const token = localStorage.getItem('authToken');
-      const res = await fetch(`${API_BASE_URL}/api/admin/teachers`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await fetch(
+        `${API_BASE_URL}/api/admin/teachers?page=${pageToFetch}&limit=${TEACHERS_PER_PAGE}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-      const data = await res.json().catch(() => []);
+      const data = await res.json().catch(() => ({}));
 
       if (!res.ok) throw new Error(data.message || 'Failed to fetch teachers');
 
-      setTeachers(data);
+      setTeachers(data.items || []);
+      setPagination(data.pagination || null);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Something went wrong';
       setError(message);
@@ -37,8 +46,10 @@ const Teachers = () => {
   }, []);
 
   useEffect(() => {
-    fetchTeachers();
-  }, [fetchTeachers]);
+    fetchTeachers(page);
+  }, [fetchTeachers, page]);
+
+  const totalPages = pagination?.totalPages ?? 1;
 
   return (
     <AdminLayout>
@@ -77,7 +88,9 @@ const Teachers = () => {
 
               {teachers.map((teacher, index) => (
                 <tr key={teacher._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm text-gray-500">{index + 1}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500">
+                    {(page - 1) * TEACHERS_PER_PAGE + index + 1}
+                  </td>
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">{teacher.name}</td>
                   <td className="px-6 py-4 text-sm text-gray-700">{teacher.numCourses}</td>
                   <td className="px-6 py-4 text-sm text-gray-700">
@@ -90,7 +103,31 @@ const Teachers = () => {
         </div>
       )}
 
-      <div className="flex justify-end mt-6">
+      <div className="flex items-center justify-between mt-6">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page <= 1 || isLoading}
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronLeftIcon className="h-4 w-4" />
+          </button>
+
+          <span className="text-sm text-gray-600">
+            Page {page} of {totalPages}
+          </span>
+
+          <button
+            type="button"
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page >= totalPages || isLoading}
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronRightIcon className="h-4 w-4" />
+          </button>
+        </div>
+
         <button
           type="button"
           onClick={() => setIsModalOpen(true)}
@@ -105,7 +142,7 @@ const Teachers = () => {
         onClose={() => setIsModalOpen(false)}
         onCreated={() => {
           setIsModalOpen(false);
-          fetchTeachers();
+          fetchTeachers(page);
         }}
       />
     </AdminLayout>

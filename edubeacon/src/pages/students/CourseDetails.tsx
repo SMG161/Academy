@@ -2,10 +2,14 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { LockClosedIcon, PlayCircleIcon } from '@heroicons/react/24/outline';
 import StudentLayout from '../../components/Student/layout/StudentLayout';
-import { useCurrentUser } from '../../hooks/useCurrentUser';
 import type { Course } from '../../types/course';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+
+interface CourseAccess {
+  isEnrolledInCourse: boolean;
+  purchasedLectureIds: string[];
+}
 
 const CourseDetails = () => {
   const { id } = useParams();
@@ -13,8 +17,7 @@ const CourseDetails = () => {
   const [course, setCourse] = useState<Course | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useCurrentUser();
-  const isEnrolledInCourse = Boolean(user?.courses?.some((c) => c._id === id));
+  const [access, setAccess] = useState<CourseAccess | null>(null);
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -37,6 +40,28 @@ const CourseDetails = () => {
     };
 
     fetchCourse();
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) return;
+
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+
+    const fetchAccess = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/courses/${id}/access`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json().catch(() => ({}));
+
+        if (res.ok) setAccess(data);
+      } catch {
+        // Lectures just render as locked until access resolves.
+      }
+    };
+
+    fetchAccess();
   }, [id]);
 
   if (isLoading) return <p className="text-gray-600 p-6">Loading course...</p>;
@@ -62,7 +87,7 @@ const CourseDetails = () => {
 
           {lectures.map((lecture) => {
             const hasAccess =
-              isEnrolledInCourse || user?.lectures?.some((l) => l._id === lecture._id);
+              access?.isEnrolledInCourse || access?.purchasedLectureIds.includes(lecture._id);
 
             return (
               <div

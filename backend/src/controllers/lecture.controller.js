@@ -104,6 +104,32 @@ exports.getLectureVideo = async (req, res) => {
   }
 };
 
+// Whether the signed-in student has access to this lecture (course enrollment
+// or an individual lecture purchase).
+exports.getLectureAccess = async (req, res) => {
+  try {
+    const lecture = await Lecture.findById(req.params.id).select('course');
+
+    if (!lecture) {
+      return res.status(404).json({ message: 'Lecture not found' });
+    }
+
+    const student = await Student.findById(req.user.userId).select('courses lectures');
+
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+
+    const hasAccess =
+      student.courses.some((c) => c.toString() === lecture.course.toString()) ||
+      student.lectures.some((l) => l.toString() === lecture._id.toString());
+
+    res.json({ hasAccess });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Delete lecture
 exports.deleteLecture = async (req, res) => {
   try {

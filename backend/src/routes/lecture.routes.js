@@ -8,6 +8,7 @@ const authMiddleware = require('../middleware/authMiddleware');
 router.post('/', authMiddleware, lectureController.createLecture);
 router.delete('/:id', authMiddleware, lectureController.deleteLecture);
 router.get('/:id/video', authMiddleware, lectureController.getLectureVideo);
+router.get('/:id/access', authMiddleware, lectureController.getLectureAccess);
 
 // Public
 router.get('/:id', lectureController.getLectureById);
