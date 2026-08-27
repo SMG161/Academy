@@ -15,8 +15,8 @@ const isStrongPassword = (value: string): boolean => {
 };
 
 const SignUpPopup = ({ isOpen, onClose }: SignUpPopupProps) => {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -49,8 +49,8 @@ const SignUpPopup = ({ isOpen, onClose }: SignUpPopupProps) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          name,
           email,
-          username: username || undefined,
           password,
           confirmPassword,
         }),
@@ -97,6 +97,21 @@ const SignUpPopup = ({ isOpen, onClose }: SignUpPopupProps) => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+              Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+              placeholder="Enter your name"
+              required
+            />
+          </div>
+
+          <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
               Email <span className="text-red-500">*</span>
             </label>
@@ -108,20 +123,6 @@ const SignUpPopup = ({ isOpen, onClose }: SignUpPopupProps) => {
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
               placeholder="Enter your email"
               required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
-              Username <span className="text-gray-400 text-xs">(optional)</span>
-            </label>
-            <input
-              type="text"
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
-              placeholder="Enter your username"
             />
           </div>
 

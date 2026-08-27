@@ -2,11 +2,14 @@ const express = require('express');
 const cors = require('cors');
 
 require('./models/Student.model');
+require('./models/Admin.model');
+require('./models/Teacher.model');
 
 const authRoutes = require('./routes/auth.routes');
 const courseRoutes = require('./routes/course.routes');
 const studentRoutes = require('./routes/student.routes');
 const lectureRoutes = require('./routes/lecture.routes');
+const adminRoutes = require('./routes/admin.routes');
 
 const app = express();
 
@@ -26,6 +29,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/lectures', lectureRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.get('/', (req, res) => {
   res.send('API is running ✅');

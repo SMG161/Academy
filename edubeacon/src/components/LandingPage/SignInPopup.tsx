@@ -46,7 +46,7 @@ const SignInPopup = ({ isOpen, onClose }: SignInPopupProps) => {
       }
 
       onClose();
-      navigate('/student/dashboard');
+      navigate(data.user?.role === 'admin' ? '/admin/dashboard' : '/student/dashboard');
     } catch (err) {
       const message =
         err instanceof Error ? err.message : 'Something went wrong. Please try again.';

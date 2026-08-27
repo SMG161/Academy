@@ -22,11 +22,11 @@ function sanitizeUser(user) {
 
 async function signup(req, res) {
   try {
-    const { email, username, password, confirmPassword, role = 'student' } = req.body;
+    const { name, email, username, password, confirmPassword, role = 'student' } = req.body;
 
-    if (!email || !password || !confirmPassword) {
+    if (!name || !email || !password || !confirmPassword) {
       return res.status(400).json({
-        message: 'Email, password and confirm password are required.',
+        message: 'Name, email, password and confirm password are required.',
       });
     }
 
@@ -59,6 +59,7 @@ async function signup(req, res) {
     const passwordHash = await hashPassword(password);
 
     const newUser = await RoleModel.create({
+      name,
       email,
       username,
       passwordHash,
