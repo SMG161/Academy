@@ -9,7 +9,7 @@ const ROLE_MODELS = {
 };
 
 const ROLE_DEFAULTS = {
-  student: { courses: [] },
+  student: { courses: [], lectures: [] },
 };
 
 function sanitizeUser(user) {

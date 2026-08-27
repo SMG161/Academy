@@ -1,7 +1,9 @@
+import type { LectureSummary } from './lecture';
+
 export interface Course {
   _id: string;
   name: string;
   teacher?: { name: string } | null;
-  description?: string;
   price: number;
+  lectures?: LectureSummary[];
 }

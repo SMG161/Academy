@@ -14,10 +14,14 @@ const courseSchema = new mongoose.Schema(
       default: null,
     },
 
-    videoPath: {
-      type: String,
-      required: true,
-      default: '/videos/sample.mp4',
+    lectures: {
+      type: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Lecture',
+        },
+      ],
+      default: [],
     },
 
     price: {

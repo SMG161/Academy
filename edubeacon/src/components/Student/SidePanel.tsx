@@ -4,6 +4,7 @@ import {
   HomeIcon,
   BookOpenIcon,
   AcademicCapIcon,
+  VideoCameraIcon,
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/outline';
@@ -20,6 +21,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: HomeIcon, path: '/student/dashboard' },
   { id: 'my-courses', label: 'My Courses', icon: BookOpenIcon, path: '/student/courses' },
+  { id: 'my-lectures', label: 'My Lectures', icon: VideoCameraIcon, path: '/student/lectures' },
   {
     id: 'browse-courses',
     label: 'Browse Courses',

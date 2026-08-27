@@ -11,6 +11,16 @@ const studentSchema = new mongoose.Schema({
     ],
     default: [],
   },
+
+  lectures: {
+    type: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Lecture',
+      },
+    ],
+    default: [],
+  },
 });
 
 module.exports = User.discriminator('student', studentSchema);

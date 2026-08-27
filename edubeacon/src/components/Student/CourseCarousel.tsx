@@ -1,17 +1,25 @@
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { Course } from '../../types/course';
+
+interface CarouselItem {
+  _id: string;
+  name: string;
+  teacher?: { name: string } | null;
+  price: number;
+  lectures?: { _id: string }[];
+}
 
 interface CourseCarouselProps {
   title: ReactNode;
-  courses: Course[];
+  courses: CarouselItem[];
+  linkBase?: string;
 }
 
-const CourseCarousel = ({ title, courses }: CourseCarouselProps) => {
+const CourseCarousel = ({ title, courses, linkBase = '/student/course' }: CourseCarouselProps) => {
   const navigate = useNavigate();
 
-  const handleCourseClick = (courseId: string) => {
-    navigate(`/student/course/${courseId}`);
+  const handleCourseClick = (id: string) => {
+    navigate(`${linkBase}/${id}`);
   };
 
   return (
@@ -20,38 +28,62 @@ const CourseCarousel = ({ title, courses }: CourseCarouselProps) => {
 
       <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
         {courses.length === 0 && (
-          <div className="flex-shrink-0 w-64 bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="h-40 w-full bg-gray-200" />
+          <div className="flex-shrink-0 w-64 rounded-2xl bg-gray-900 overflow-hidden">
+            <div className="h-40 w-full bg-gray-800" />
 
             <div className="p-4 space-y-2">
-              <div className="h-4 w-3/4 rounded bg-gray-200" />
-              <div className="h-3 w-1/2 rounded bg-gray-200" />
+              <div className="h-4 w-3/4 rounded bg-gray-700" />
+              <div className="h-3 w-1/2 rounded bg-gray-700" />
             </div>
           </div>
         )}
 
-        {courses.map((course) => (
-          <div
-            key={course._id}
-            className="flex-shrink-0 w-64 bg-white rounded-lg shadow-md cursor-pointer hover:shadow-lg transition-shadow"
-            onClick={() => handleCourseClick(course._id)}
-          >
-            <div className="h-40 w-full overflow-hidden rounded-t-lg">
-              <img
-                src="/landing page image.png" // placeholder for now
-                alt={course.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
+        {courses.map((course) => {
+          const lectureCount = course.lectures?.length ?? 0;
 
-            <div className="p-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-1">{course.name}</h3>
-              <p className="text-sm text-gray-500">
-                {course.teacher?.name || 'Unidentified teacher'}
-              </p>
+          return (
+            <div
+              key={course._id}
+              className="flex-shrink-0 w-64 rounded-2xl bg-gradient-to-b from-gray-900 to-black border border-white/10 overflow-hidden shadow-lg cursor-pointer hover:-translate-y-0.5 hover:shadow-xl transition-all"
+              onClick={() => handleCourseClick(course._id)}
+            >
+              <div className="relative h-40 w-full overflow-hidden">
+                <img
+                  src="/landing page image.png" // placeholder for now
+                  alt={course.name}
+                  className="w-full h-full object-cover"
+                />
+
+                {lectureCount > 0 && (
+                  <span className="absolute top-3 right-3 bg-black/60 backdrop-blur text-white text-xs font-medium px-3 py-1 rounded-full border border-white/10">
+                    {lectureCount} {lectureCount === 1 ? 'lecture' : 'lectures'}
+                  </span>
+                )}
+              </div>
+
+              <div className="p-4">
+                <h3 className="text-white font-semibold text-base line-clamp-1">{course.name}</h3>
+                <p className="text-gray-400 text-sm mt-0.5">
+                  {course.teacher?.name || 'Unidentified teacher'}
+                </p>
+
+                <div className="mt-3 flex items-center justify-between">
+                  <span className="text-white font-semibold text-sm">Rs. {course.price}</span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCourseClick(course._id);
+                    }}
+                    className="text-blue-400 text-sm font-medium hover:text-blue-300 transition-colors"
+                  >
+                    View course
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

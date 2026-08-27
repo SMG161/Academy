@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { Course } from '../types/course';
+import type { Lecture } from '../types/lecture';
 
 interface CurrentUser {
   _id: string;
@@ -7,6 +8,7 @@ interface CurrentUser {
   username?: string;
   role: string;
   courses?: Course[];
+  lectures?: Lecture[]; // lectures the student has bought individually
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';

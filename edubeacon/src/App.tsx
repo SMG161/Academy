@@ -3,6 +3,7 @@ import Landing from './pages/Landing';
 import StudentProtectedRoute from './components/StudentProtectedRoute';
 import StudentDashboard from './pages/students/StudentDashboard';
 import CourseDetails from './pages/students/CourseDetails';
+import LectureDetails from './pages/students/LectureDetails';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route element={<StudentProtectedRoute />}>
           <Route path="/student/dashboard" element={<StudentDashboard />} />
           <Route path="/student/course/:id" element={<CourseDetails />} />
+          <Route path="/student/lecture/:id" element={<LectureDetails />} />
         </Route>
       </Routes>
     </Router>
