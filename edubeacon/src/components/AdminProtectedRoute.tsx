@@ -1,19 +1,10 @@
 import { Navigate, Outlet } from 'react-router-dom';
-
-function getRoleFromToken(token: string): string | null {
-  try {
-    const payload = token.split('.')[1];
-    const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
-    return decoded.role ?? null;
-  } catch {
-    return null;
-  }
-}
+import { decodeToken } from '../utils/jwt';
 
 const AdminProtectedRoute = () => {
   const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
 
-  if (!token || getRoleFromToken(token) !== 'admin') {
+  if (!token || decodeToken(token)?.role !== 'admin') {
     return <Navigate to="/" replace />;
   }
 

@@ -5,7 +5,7 @@ const { getPagination, buildPagination } = require('../utils/pagination');
 // Create course
 exports.createCourse = async (req, res) => {
   try {
-    const { name, price } = req.body;
+    const { name, price, description } = req.body;
 
     if (!name || price === undefined) {
       return res.status(400).json({ message: 'Name and price are required' });
@@ -14,7 +14,8 @@ exports.createCourse = async (req, res) => {
     const course = await Course.create({
       name,
       price,
-      teacher: req.user?.id || null, // optional
+      description: description || '',
+      teacher: req.user.userId,
     });
 
     res.status(201).json(course);

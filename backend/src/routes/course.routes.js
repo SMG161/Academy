@@ -3,9 +3,10 @@ const router = express.Router();
 
 const courseController = require('../controllers/course.controller');
 const authMiddleware = require('../middleware/authMiddleware');
+const requireTeacherOrAdmin = require('../middleware/requireTeacherOrAdmin');
 
 // Protected
-router.post('/', authMiddleware, courseController.createCourse);
+router.post('/', authMiddleware, requireTeacherOrAdmin, courseController.createCourse);
 router.delete('/:id', authMiddleware, courseController.deleteCourse);
 router.get('/:id/access', authMiddleware, courseController.getCourseAccess);
 

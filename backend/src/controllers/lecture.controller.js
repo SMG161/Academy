@@ -37,13 +37,23 @@ exports.createLecture = async (req, res) => {
       return res.status(404).json({ message: 'Course not found' });
     }
 
+    const isOwner = courseDoc.teacher && courseDoc.teacher.toString() === req.user.userId;
+    if (!isOwner && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'You do not have permission to add lectures to this course' });
+    }
+
+    // videoPath must come from this teacher's own presigned upload namespace.
+    if (req.user.role !== 'admin' && !videoPath.startsWith(`lectures/${req.user.userId}/`)) {
+      return res.status(403).json({ message: 'Invalid videoPath' });
+    }
+
     const lecture = await Lecture.create({
       name,
       course,
       description,
       videoPath,
       price,
-      teacher: req.user?.userId || null,
+      teacher: req.user.userId,
     });
 
     courseDoc.lectures.push(lecture._id);

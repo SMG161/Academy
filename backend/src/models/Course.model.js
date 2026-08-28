@@ -8,6 +8,12 @@ const courseSchema = new mongoose.Schema(
       trim: true,
     },
 
+    description: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+
     teacher: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User', // teacher model later
