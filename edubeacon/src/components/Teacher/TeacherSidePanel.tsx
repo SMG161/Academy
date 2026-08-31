@@ -84,6 +84,7 @@ const TeacherSidePanel = ({ isCollapsed }: TeacherSidePanelProps) => {
       <div className="px-3 pb-4 pt-3">
         <button
           type="button"
+          onClick={() => navigate('/teacher/settings')}
           className={`flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors mb-2 ${
             isCollapsed ? 'justify-center' : ''
           }`}

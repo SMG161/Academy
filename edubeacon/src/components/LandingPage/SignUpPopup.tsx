@@ -21,8 +21,19 @@ const SignUpPopup = ({ isOpen, onClose }: SignUpPopupProps) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
 
   if (!isOpen) return null;
+
+  const handleClose = () => {
+    setSubmittedEmail(null);
+    setName('');
+    setEmail('');
+    setPassword('');
+    setConfirmPassword('');
+    setError(null);
+    onClose();
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -62,9 +73,7 @@ const SignUpPopup = ({ isOpen, onClose }: SignUpPopupProps) => {
         throw new Error(data.message || 'Something went wrong. Please try again.');
       }
 
-      // TODO: store token / user data as needed
-      console.log('Signed up:', data);
-      onClose();
+      setSubmittedEmail(data.email || email);
     } catch (err) {
       const message =
         err instanceof Error ? err.message : 'Something went wrong. Please try again.';
@@ -80,13 +89,31 @@ const SignUpPopup = ({ isOpen, onClose }: SignUpPopupProps) => {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Sign Up</h2>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
           >
             ×
           </button>
         </div>
 
+        {submittedEmail ? (
+          <div className="text-center py-4">
+            <p className="text-gray-700 mb-2">
+              We've sent a verification link to <span className="font-semibold">{submittedEmail}</span>.
+            </p>
+            <p className="text-gray-500 text-sm mb-6">
+              Please check your inbox and click the link to activate your account before signing in.
+            </p>
+            <button
+              type="button"
+              onClick={handleClose}
+              className="w-full bg-purple-600 text-white py-3 rounded-md font-semibold hover:bg-purple-700 transition-colors"
+            >
+              Done
+            </button>
+          </div>
+        ) : (
+        <>
         {error && (
           <div className="mb-4 bg-red-100 border border-red-400 rounded-md p-3">
             <div className="bg-red-200 text-red-800 text-sm font-medium px-3 py-2 rounded">
@@ -167,6 +194,8 @@ const SignUpPopup = ({ isOpen, onClose }: SignUpPopupProps) => {
             {isLoading ? 'Signing up...' : 'Sign Up'}
           </button>
         </form>
+        </>
+        )}
       </div>
     </div>
   );

@@ -29,7 +29,7 @@ exports.createTeacher = async (req, res) => {
     }
 
     const passwordHash = await hashPassword(password);
-    const teacher = await Teacher.create({ name, email, passwordHash });
+    const teacher = await Teacher.create({ name, email, passwordHash, isVerified: true });
 
     return res.status(201).json({
       message: 'Teacher created successfully',
