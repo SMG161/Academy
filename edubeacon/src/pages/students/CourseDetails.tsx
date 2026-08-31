@@ -9,6 +9,11 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000
 interface CourseAccess {
   isEnrolledInCourse: boolean;
   purchasedLectureIds: string[];
+  courseExpiresAt: string | null;
+}
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 const CourseDetails = () => {
@@ -78,6 +83,11 @@ const CourseDetails = () => {
             {course.name}
           </h1>
           <p className="text-gray-600 mt-2">{course.teacher?.name || 'Unidentified teacher'}</p>
+          {access?.isEnrolledInCourse && access.courseExpiresAt && (
+            <p className="text-sm text-purple-600 mt-1">
+              Access expires on {formatDate(access.courseExpiresAt)}
+            </p>
+          )}
         </div>
 
         <div className="w-full bg-white rounded-xl shadow-md divide-y divide-gray-100">

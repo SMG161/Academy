@@ -13,7 +13,7 @@ interface TeacherCourseDetail {
   name: string;
   description?: string;
   price: number;
-  teacher: string | null;
+  teacher: { _id: string; name: string } | null;
   lectures: LectureSummary[];
 }
 
@@ -53,7 +53,7 @@ const TeacherCourseDetails = () => {
 
   const token = localStorage.getItem('authToken');
   const decoded = token ? decodeToken(token) : null;
-  const canManage = decoded?.role === 'admin' || course.teacher === decoded?.userId;
+  const canManage = decoded?.role === 'admin' || course.teacher?._id === decoded?.userId;
   const lectures = course.lectures || [];
 
   return (

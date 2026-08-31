@@ -97,7 +97,7 @@ exports.getStats = async (req, res) => {
         courseId: course._id,
         courseName: course.name,
         lectureCount: lectureCountMap.get(course._id.toString()) || 0,
-        studentCount: await Student.countDocuments({ courses: course._id }),
+        studentCount: await Student.countDocuments({ 'courses.course': course._id }),
       }))
     );
 
@@ -108,7 +108,7 @@ exports.getStats = async (req, res) => {
           .map((c) => c._id);
 
         const uniqueStudentCount = teacherCourseIds.length
-          ? await Student.countDocuments({ courses: { $in: teacherCourseIds } })
+          ? await Student.countDocuments({ 'courses.course': { $in: teacherCourseIds } })
           : 0;
 
         return {

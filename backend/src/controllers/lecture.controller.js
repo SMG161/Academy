@@ -93,13 +93,20 @@ exports.getLectureVideo = async (req, res) => {
     }
 
     const student = await Student.findById(req.user.userId);
+    const now = new Date();
 
     const hasCourseAccess = Boolean(
-      student && student.courses.some((courseId) => courseId.toString() === lecture.course.toString())
+      student &&
+        student.courses.some(
+          (c) => c.course.toString() === lecture.course.toString() && c.expiresAt > now
+        )
     );
 
     const hasLectureAccess = Boolean(
-      student && student.lectures.some((lectureId) => lectureId.toString() === lecture._id.toString())
+      student &&
+        student.lectures.some(
+          (l) => l.lecture.toString() === lecture._id.toString() && l.expiresAt > now
+        )
     );
 
     if (!hasCourseAccess && !hasLectureAccess) {
@@ -130,11 +137,18 @@ exports.getLectureAccess = async (req, res) => {
       return res.status(404).json({ message: 'Student not found' });
     }
 
-    const hasAccess =
-      student.courses.some((c) => c.toString() === lecture.course.toString()) ||
-      student.lectures.some((l) => l.toString() === lecture._id.toString());
+    const now = new Date();
+    const courseEntry = student.courses.find(
+      (c) => c.course.toString() === lecture.course.toString() && c.expiresAt > now
+    );
+    const lectureEntry = student.lectures.find(
+      (l) => l.lecture.toString() === lecture._id.toString() && l.expiresAt > now
+    );
 
-    res.json({ hasAccess });
+    const hasAccess = Boolean(courseEntry || lectureEntry);
+    const expiresAt = courseEntry ? courseEntry.expiresAt : lectureEntry ? lectureEntry.expiresAt : null;
+
+    res.json({ hasAccess, expiresAt });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

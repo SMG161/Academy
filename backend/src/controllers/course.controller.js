@@ -34,7 +34,8 @@ exports.getAllCourses = async (req, res) => {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .populate('lectures', 'name price'),
+        .populate('lectures', 'name price')
+        .populate('teacher', 'name'),
       Course.countDocuments(),
     ]);
 
@@ -47,7 +48,9 @@ exports.getAllCourses = async (req, res) => {
 // Get course by ID
 exports.getCourseById = async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id).populate('lectures', 'name price');
+    const course = await Course.findById(req.params.id)
+      .populate('lectures', 'name price')
+      .populate('teacher', 'name');
 
     if (!course) {
       return res.status(404).json({ message: 'Course not found' });
@@ -75,16 +78,25 @@ exports.getCourseAccess = async (req, res) => {
       return res.status(404).json({ message: 'Student not found' });
     }
 
-    const isEnrolledInCourse = student.courses.some(
-      (courseId) => courseId.toString() === course._id.toString()
+    const now = new Date();
+    const courseEntry = student.courses.find(
+      (c) => c.course.toString() === course._id.toString() && c.expiresAt > now
     );
+    const isEnrolledInCourse = Boolean(courseEntry);
 
     const courseLectureIds = new Set(course.lectures.map((l) => l.toString()));
     const purchasedLectureIds = isEnrolledInCourse
       ? course.lectures.map((l) => l.toString())
-      : student.lectures.map((l) => l.toString()).filter((l) => courseLectureIds.has(l));
+      : student.lectures
+          .filter((l) => l.expiresAt > now)
+          .map((l) => l.lecture.toString())
+          .filter((l) => courseLectureIds.has(l));
 
-    res.json({ isEnrolledInCourse, purchasedLectureIds });
+    res.json({
+      isEnrolledInCourse,
+      purchasedLectureIds,
+      courseExpiresAt: courseEntry ? courseEntry.expiresAt : null,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

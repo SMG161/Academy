@@ -9,6 +9,10 @@ import type { Lecture } from '../../types/lecture';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
 const LectureDetails = () => {
   const { id } = useParams();
   const [lecture, setLecture] = useState<Lecture | null>(null);
@@ -16,6 +20,7 @@ const LectureDetails = () => {
   const [error, setError] = useState<string | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
+  const [expiresAt, setExpiresAt] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchLecture = async () => {
@@ -57,6 +62,7 @@ const LectureDetails = () => {
         const data = await res.json().catch(() => ({}));
 
         setHasAccess(res.ok ? Boolean(data.hasAccess) : false);
+        setExpiresAt(res.ok ? data.expiresAt || null : null);
       } catch {
         setHasAccess(false);
       }
@@ -102,6 +108,9 @@ const LectureDetails = () => {
             {lecture.name}
           </h1>
           <p className="text-gray-500 mt-2">Part of {lecture.course.name}</p>
+          {hasAccess && expiresAt && (
+            <p className="text-sm text-purple-600 mt-1">Access expires on {formatDate(expiresAt)}</p>
+          )}
         </div>
 
         {hasAccess === null ? (

@@ -40,18 +40,28 @@ exports.getMyCourses = async (req, res) => {
       return res.status(404).json({ message: 'Student not found.' });
     }
 
-    const filter = { _id: { $in: student.courses } };
+    const now = new Date();
+    const activeEntries = student.courses.filter((c) => c.expiresAt > now);
+    const expiryMap = new Map(activeEntries.map((c) => [c.course.toString(), c.expiresAt]));
+
+    const filter = { _id: { $in: activeEntries.map((c) => c.course) } };
 
     const [courses, total] = await Promise.all([
       Course.find(filter)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .populate('lectures', 'name price'),
+        .populate('lectures', 'name price')
+        .populate('teacher', 'name'),
       Course.countDocuments(filter),
     ]);
 
-    return res.status(200).json({ items: courses, pagination: buildPagination({ page, limit, total }) });
+    const items = courses.map((course) => ({
+      ...course.toObject(),
+      expiresAt: expiryMap.get(course._id.toString()) || null,
+    }));
+
+    return res.status(200).json({ items, pagination: buildPagination({ page, limit, total }) });
   } catch (error) {
     console.error('Get my courses error:', error);
     return res.status(500).json({ message: 'Internal server error' });
@@ -70,9 +80,14 @@ exports.getMyLectures = async (req, res) => {
       return res.status(404).json({ message: 'Student not found.' });
     }
 
+    const now = new Date();
+    const activeCourseIds = student.courses.filter((c) => c.expiresAt > now).map((c) => c.course);
+    const activeLectureEntries = student.lectures.filter((l) => l.expiresAt > now);
+    const expiryMap = new Map(activeLectureEntries.map((l) => [l.lecture.toString(), l.expiresAt]));
+
     const filter = {
-      _id: { $in: student.lectures },
-      course: { $nin: student.courses },
+      _id: { $in: activeLectureEntries.map((l) => l.lecture) },
+      course: { $nin: activeCourseIds },
     };
 
     const [lectures, total] = await Promise.all([
@@ -86,7 +101,12 @@ exports.getMyLectures = async (req, res) => {
       Lecture.countDocuments(filter),
     ]);
 
-    return res.status(200).json({ items: lectures, pagination: buildPagination({ page, limit, total }) });
+    const items = lectures.map((lecture) => ({
+      ...lecture.toObject(),
+      expiresAt: expiryMap.get(lecture._id.toString()) || null,
+    }));
+
+    return res.status(200).json({ items, pagination: buildPagination({ page, limit, total }) });
   } catch (error) {
     console.error('Get my lectures error:', error);
     return res.status(500).json({ message: 'Internal server error' });
