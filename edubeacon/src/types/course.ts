@@ -7,6 +7,7 @@ export interface Course {
   teacher?: { name: string } | null;
   price: number;
   lectures?: LectureSummary[];
+  thumbnailUrl?: string | null;
 }
 
 export interface TeacherCourseSummary {

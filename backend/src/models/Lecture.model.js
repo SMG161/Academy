@@ -35,6 +35,11 @@ const lectureSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+
+    thumbnailPath: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,

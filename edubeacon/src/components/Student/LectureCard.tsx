@@ -1,9 +1,12 @@
 import { PlayIcon } from '@heroicons/react/24/solid';
 
+const PLACEHOLDER_THUMBNAIL = '/landing page image.png';
+
 interface LectureCardItem {
   _id: string;
   name: string;
   course: { name: string };
+  thumbnailUrl?: string | null;
 }
 
 interface LectureCardProps {
@@ -18,7 +21,7 @@ const LectureCard = ({ lecture, onClick }: LectureCardProps) => (
   >
     <div className="relative h-40 w-full overflow-hidden">
       <img
-        src="/landing page image.png" // placeholder for now
+        src={lecture.thumbnailUrl || PLACEHOLDER_THUMBNAIL}
         alt={lecture.name}
         className="w-full h-full object-cover"
       />

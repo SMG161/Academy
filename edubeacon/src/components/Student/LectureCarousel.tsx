@@ -6,6 +6,7 @@ interface LectureCarouselItem {
   _id: string;
   name: string;
   course: { name: string };
+  thumbnailUrl?: string | null;
 }
 
 interface LectureCarouselProps {

@@ -1,14 +1,24 @@
 const Course = require('../models/Course.model');
 const Student = require('../models/Student.model');
 const { getPagination, buildPagination } = require('../utils/pagination');
+const { withThumbnailUrl } = require('../utils/cdn');
+
+function sanitizeCourse(course) {
+  return withThumbnailUrl(course.toObject());
+}
 
 // Create course
 exports.createCourse = async (req, res) => {
   try {
-    const { name, price, description } = req.body;
+    const { name, price, description, thumbnailPath } = req.body;
 
     if (!name || price === undefined) {
       return res.status(400).json({ message: 'Name and price are required' });
+    }
+
+    // thumbnailPath must come from this teacher's own presigned upload namespace.
+    if (thumbnailPath && req.user.role !== 'admin' && !thumbnailPath.startsWith(`thumbnails/${req.user.userId}/`)) {
+      return res.status(403).json({ message: 'Invalid thumbnailPath' });
     }
 
     const course = await Course.create({
@@ -16,9 +26,10 @@ exports.createCourse = async (req, res) => {
       price,
       description: description || '',
       teacher: req.user.userId,
+      thumbnailPath: thumbnailPath || null,
     });
 
-    res.status(201).json(course);
+    res.status(201).json(sanitizeCourse(course));
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -39,7 +50,7 @@ exports.getAllCourses = async (req, res) => {
       Course.countDocuments(),
     ]);
 
-    res.json({ items: courses, pagination: buildPagination({ page, limit, total }) });
+    res.json({ items: courses.map(sanitizeCourse), pagination: buildPagination({ page, limit, total }) });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -56,7 +67,7 @@ exports.getCourseById = async (req, res) => {
       return res.status(404).json({ message: 'Course not found' });
     }
 
-    res.json(course);
+    res.json(sanitizeCourse(course));
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

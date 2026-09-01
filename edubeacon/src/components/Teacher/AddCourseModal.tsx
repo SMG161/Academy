@@ -1,4 +1,4 @@
-import { type FormEvent, useState } from 'react';
+import { type ChangeEvent, type FormEvent, useState } from 'react';
 
 interface AddCourseModalProps {
   isOpen: boolean;
@@ -12,10 +12,15 @@ const AddCourseModal = ({ isOpen, onClose, onCreated }: AddCourseModalProps) => 
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
   const [description, setDescription] = useState('');
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   if (!isOpen) return null;
+
+  const handleThumbnailChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setThumbnailFile(e.target.files?.[0] || null);
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -24,13 +29,44 @@ const AddCourseModal = ({ isOpen, onClose, onCreated }: AddCourseModalProps) => 
 
     try {
       const token = localStorage.getItem('authToken');
+
+      let thumbnailPath: string | undefined;
+      if (thumbnailFile) {
+        const presignRes = await fetch(`${API_BASE_URL}/api/uploads/thumbnail`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ fileName: thumbnailFile.name, fileType: thumbnailFile.type }),
+        });
+
+        const presignData = await presignRes.json().catch(() => ({}));
+
+        if (!presignRes.ok) {
+          throw new Error(presignData.message || 'Failed to prepare thumbnail upload');
+        }
+
+        const uploadRes = await fetch(presignData.uploadUrl, {
+          method: 'PUT',
+          headers: { 'Content-Type': thumbnailFile.type },
+          body: thumbnailFile,
+        });
+
+        if (!uploadRes.ok) {
+          throw new Error('Thumbnail upload failed');
+        }
+
+        thumbnailPath = presignData.thumbnailPath;
+      }
+
       const response = await fetch(`${API_BASE_URL}/api/courses`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ name, price: Number(price), description }),
+        body: JSON.stringify({ name, price: Number(price), description, thumbnailPath }),
       });
 
       const data = await response.json().catch(() => ({}));
@@ -42,6 +78,7 @@ const AddCourseModal = ({ isOpen, onClose, onCreated }: AddCourseModalProps) => 
       setName('');
       setPrice('');
       setDescription('');
+      setThumbnailFile(null);
       onCreated();
     } catch (err) {
       const message =
@@ -121,6 +158,22 @@ const AddCourseModal = ({ isOpen, onClose, onCreated }: AddCourseModalProps) => 
               placeholder="Describe this course"
               rows={3}
             />
+          </div>
+
+          <div>
+            <label htmlFor="course-thumbnail" className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
+              Thumbnail <span className="text-gray-400 font-normal dark:text-gray-500">(optional)</span>
+            </label>
+            <input
+              type="file"
+              id="course-thumbnail"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={handleThumbnailChange}
+              className="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-purple-50 file:text-purple-700 file:font-semibold hover:file:bg-purple-100 dark:text-gray-400 dark:file:bg-purple-950/40 dark:file:text-purple-300 dark:hover:file:bg-purple-900/40"
+            />
+            <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">
+              If left blank, a frame from the first uploaded lecture will be used once available.
+            </p>
           </div>
 
           <button

@@ -1,9 +1,12 @@
+const PLACEHOLDER_THUMBNAIL = '/landing page image.png';
+
 interface CourseCardItem {
   _id: string;
   name: string;
   teacher?: { name: string } | null;
   price: number;
   lectures?: { _id: string }[];
+  thumbnailUrl?: string | null;
 }
 
 interface CourseCardProps {
@@ -21,7 +24,7 @@ const CourseCard = ({ course, onClick }: CourseCardProps) => {
     >
       <div className="relative h-40 w-full overflow-hidden">
         <img
-          src="/landing page image.png" // placeholder for now
+          src={course.thumbnailUrl || PLACEHOLDER_THUMBNAIL}
           alt={course.name}
           className="w-full h-full object-cover"
         />

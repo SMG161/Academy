@@ -11,4 +11,5 @@ export interface Lecture {
   teacher?: { name: string } | null;
   description?: string;
   price: number;
+  thumbnailUrl?: string | null;
 }

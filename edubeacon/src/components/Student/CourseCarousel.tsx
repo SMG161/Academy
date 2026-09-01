@@ -8,6 +8,7 @@ interface CarouselItem {
   teacher?: { name: string } | null;
   price: number;
   lectures?: { _id: string }[];
+  thumbnailUrl?: string | null;
 }
 
 interface CourseCarouselProps {

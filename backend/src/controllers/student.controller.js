@@ -2,6 +2,7 @@ const Student = require('../models/Student.model');
 const Course = require('../models/Course.model');
 const Lecture = require('../models/Lecture.model');
 const { getPagination, buildPagination } = require('../utils/pagination');
+const { withThumbnailUrl } = require('../utils/cdn');
 
 function sanitizeUser(user) {
   if (!user) return null;
@@ -57,7 +58,7 @@ exports.getMyCourses = async (req, res) => {
     ]);
 
     const items = courses.map((course) => ({
-      ...course.toObject(),
+      ...withThumbnailUrl(course.toObject()),
       expiresAt: expiryMap.get(course._id.toString()) || null,
     }));
 
@@ -102,7 +103,7 @@ exports.getMyLectures = async (req, res) => {
     ]);
 
     const items = lectures.map((lecture) => ({
-      ...lecture.toObject(),
+      ...withThumbnailUrl(lecture.toObject()),
       expiresAt: expiryMap.get(lecture._id.toString()) || null,
     }));
 

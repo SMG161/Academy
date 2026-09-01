@@ -10,6 +10,8 @@ const ALLOWED_VIDEO_TYPES = new Set([
   'video/x-matroska',
 ]);
 
+const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+
 const UPLOAD_URL_EXPIRY_SECONDS = 15 * 60;
 
 // Issues a short-lived, signed S3 PUT URL scoped to the requesting
@@ -40,6 +42,39 @@ exports.getLectureUploadUrl = async (req, res) => {
     });
 
     res.json({ uploadUrl, videoPath: key });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Issues a short-lived, signed S3 PUT URL for a course/lecture thumbnail
+// image, scoped to the requesting teacher/admin's own upload namespace.
+exports.getThumbnailUploadUrl = async (req, res) => {
+  try {
+    const { fileName, fileType } = req.body;
+
+    if (!fileName || !fileType) {
+      return res.status(400).json({ message: 'fileName and fileType are required' });
+    }
+
+    if (!ALLOWED_IMAGE_TYPES.has(fileType)) {
+      return res.status(400).json({ message: 'Unsupported image type' });
+    }
+
+    const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const key = `thumbnails/${req.user.userId}/${Date.now()}-${crypto.randomUUID()}-${safeName}`;
+
+    const command = new PutObjectCommand({
+      Bucket: bucketName,
+      Key: key,
+      ContentType: fileType,
+    });
+
+    const uploadUrl = await getSignedUrl(s3Client, command, {
+      expiresIn: UPLOAD_URL_EXPIRY_SECONDS,
+    });
+
+    res.json({ uploadUrl, thumbnailPath: key });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
