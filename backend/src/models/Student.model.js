@@ -6,6 +6,7 @@ const courseGrantSchema = new mongoose.Schema(
     course: { type: mongoose.Schema.Types.ObjectId, ref: 'Course', required: true },
     expiresAt: { type: Date, required: true },
     grantedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    notifiedMilestones: { type: [String], default: [] },
   },
   { timestamps: true }
 );

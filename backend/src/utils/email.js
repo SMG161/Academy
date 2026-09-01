@@ -72,6 +72,8 @@ async function sendTeacherInviteEmail(to, name, token) {
 }
 
 async function sendOtpEmail(to, name, code) {
+  console.log(`[OTP] Login code for ${to}: ${code}`);
+
   await sendEmail({
     to,
     subject: `${code} is your EduBeacon login code`,

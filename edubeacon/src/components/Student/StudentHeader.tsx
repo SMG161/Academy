@@ -1,7 +1,9 @@
+import NotificationBell from './NotificationBell';
+
 interface HeaderProps {
     onToggle: () => void;
   }
-  
+
   const StudentHeader = ({ onToggle }: HeaderProps) => {
     return (
       <header className="fixed top-0 left-0 right-0 z-50 h-16 flex items-center justify-between px-6 bg-gray-900 text-white border-b border-white/5 shadow-md">
@@ -17,7 +19,7 @@ interface HeaderProps {
               <span className="block h-0.5 w-4 rounded-full bg-white/60" />
             </span>
           </button>
-  
+
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 font-bold shadow-md">
               E
@@ -28,8 +30,12 @@ interface HeaderProps {
             </div>
           </div>
         </div>
+
+        <div className="ml-auto flex items-center">
+          <NotificationBell />
+        </div>
       </header>
     );
   };
-  
+
   export default StudentHeader;

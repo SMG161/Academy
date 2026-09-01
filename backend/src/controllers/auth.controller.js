@@ -204,7 +204,11 @@ async function signin(req, res) {
       user.otpAttempts = 0;
       await user.save();
 
-      await sendOtpEmail(user.email, user.name, code);
+      try {
+        await sendOtpEmail(user.email, user.name, code);
+      } catch (emailError) {
+        console.error('Failed to send OTP email (code was still generated and logged above):', emailError.message);
+      }
 
       console.log('Password verified, OTP sent', user.email);
 
@@ -331,7 +335,11 @@ async function requestOtp(req, res) {
     user.otpAttempts = 0;
     await user.save();
 
-    await sendOtpEmail(user.email, user.name, code);
+    try {
+      await sendOtpEmail(user.email, user.name, code);
+    } catch (emailError) {
+      console.error('Failed to send OTP email (code was still generated and logged above):', emailError.message);
+    }
 
     return res.status(200).json({
       message: 'If that account exists, a login code has been sent to it.',

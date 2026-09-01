@@ -14,6 +14,7 @@ const adminRoutes = require('./routes/admin.routes');
 const teacherRoutes = require('./routes/teacher.routes');
 const uploadRoutes = require('./routes/upload.routes');
 const accountRoutes = require('./routes/account.routes');
+const notificationRoutes = require('./routes/notification.routes');
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/teacher', teacherRoutes);
 app.use('/api/uploads', uploadRoutes);
 app.use('/api/account', accountRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 app.get('/', (req, res) => {
   res.send('API is running ✅');

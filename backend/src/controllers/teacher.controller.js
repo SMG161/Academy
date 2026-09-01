@@ -3,10 +3,14 @@ const Lecture = require('../models/Lecture.model');
 const Student = require('../models/Student.model');
 const { getPagination, buildPagination } = require('../utils/pagination');
 const { escapeRegex } = require('../utils/regex');
+const {
+  computeInitialNotifiedMilestones,
+  notifyAccessGranted,
+} = require('../utils/notifications');
 
-function parseFutureDate(value) {
+function parseFutureDate(value, now = new Date()) {
   const date = new Date(value);
-  if (Number.isNaN(date.getTime()) || date <= new Date()) return null;
+  if (Number.isNaN(date.getTime()) || date <= now) return null;
   return date;
 }
 
@@ -212,6 +216,7 @@ exports.getAvailableLectures = async (req, res) => {
 // one of this teacher's courses.
 exports.grantCourseAccess = async (req, res) => {
   try {
+    const now = new Date();
     const teacherId = req.user.userId;
     const { courseId, expiresAt } = req.body;
 
@@ -219,12 +224,12 @@ exports.grantCourseAccess = async (req, res) => {
       return res.status(400).json({ message: 'courseId and expiresAt are required' });
     }
 
-    const expiryDate = parseFutureDate(expiresAt);
+    const expiryDate = parseFutureDate(expiresAt, now);
     if (!expiryDate) {
       return res.status(400).json({ message: 'expiresAt must be a valid future date' });
     }
 
-    const course = await Course.findById(courseId).select('teacher');
+    const course = await Course.findById(courseId).select('name teacher');
     if (!course) return res.status(404).json({ message: 'Course not found' });
     if (!course.teacher || course.teacher.toString() !== teacherId) {
       return res.status(403).json({ message: 'You do not own this course' });
@@ -233,15 +238,31 @@ exports.grantCourseAccess = async (req, res) => {
     const student = await Student.findById(req.params.studentId);
     if (!student) return res.status(404).json({ message: 'Student not found' });
 
+    const notifiedMilestones = computeInitialNotifiedMilestones(expiryDate, now);
+
     const existing = student.courses.find((c) => c.course.toString() === courseId);
     if (existing) {
       existing.expiresAt = expiryDate;
       existing.grantedBy = teacherId;
+      existing.notifiedMilestones = notifiedMilestones;
     } else {
-      student.courses.push({ course: courseId, expiresAt: expiryDate, grantedBy: teacherId });
+      student.courses.push({
+        course: courseId,
+        expiresAt: expiryDate,
+        grantedBy: teacherId,
+        notifiedMilestones,
+      });
     }
 
     await student.save();
+
+    await notifyAccessGranted({
+      studentId: student._id,
+      courseId: course._id,
+      courseName: course.name,
+      expiresAt: expiryDate,
+    });
+
     res.status(200).json({ message: 'Course access granted' });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -321,7 +342,8 @@ async function findOwnedLectureGrant(studentId, grantId, teacherId) {
 
 exports.updateCourseGrant = async (req, res) => {
   try {
-    const expiryDate = parseFutureDate(req.body.expiresAt);
+    const now = new Date();
+    const expiryDate = parseFutureDate(req.body.expiresAt, now);
     if (!expiryDate) {
       return res.status(400).json({ message: 'expiresAt must be a valid future date' });
     }
@@ -330,6 +352,7 @@ exports.updateCourseGrant = async (req, res) => {
     if (result.error) return res.status(result.error).json({ message: result.message });
 
     result.entry.expiresAt = expiryDate;
+    result.entry.notifiedMilestones = computeInitialNotifiedMilestones(expiryDate, now);
     await result.student.save();
     res.json({ message: 'Expiry updated' });
   } catch (error) {
