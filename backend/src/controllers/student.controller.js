@@ -32,7 +32,7 @@ exports.getMe = async (req, res) => {
 // Paginated list of courses the student is enrolled in.
 exports.getMyCourses = async (req, res) => {
   try {
-    const { page, limit, skip } = getPagination(req, { defaultLimit: 10, maxLimit: 50 });
+    const { page, limit, skip } = getPagination(req, { defaultLimit: 27, maxLimit: 27 });
 
     const student = await Student.findById(req.user.userId).select('courses');
 
@@ -72,7 +72,7 @@ exports.getMyCourses = async (req, res) => {
 // lecture already covered by a fully-owned course.
 exports.getMyLectures = async (req, res) => {
   try {
-    const { page, limit, skip } = getPagination(req, { defaultLimit: 10, maxLimit: 50 });
+    const { page, limit, skip } = getPagination(req, { defaultLimit: 27, maxLimit: 27 });
 
     const student = await Student.findById(req.user.userId).select('courses lectures');
 

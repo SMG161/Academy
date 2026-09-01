@@ -94,60 +94,60 @@ const StudentDetail = () => {
     fetchDetail();
   };
 
-  if (isLoading) return <TeacherLayout><p className="text-gray-600">Loading student...</p></TeacherLayout>;
-  if (error) return <TeacherLayout><p className="text-red-600">{error}</p></TeacherLayout>;
-  if (!data || !id) return <TeacherLayout><p className="text-gray-600">Student not found.</p></TeacherLayout>;
+  if (isLoading) return <TeacherLayout><p className="text-gray-600 dark:text-gray-400">Loading student...</p></TeacherLayout>;
+  if (error) return <TeacherLayout><p className="text-red-600 dark:text-red-400">{error}</p></TeacherLayout>;
+  if (!data || !id) return <TeacherLayout><p className="text-gray-600 dark:text-gray-400">Student not found.</p></TeacherLayout>;
 
   return (
     <TeacherLayout>
       <div className="space-y-10">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{data.student.name}</h1>
-          <p className="text-gray-500">{data.student.email}</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{data.student.name}</h1>
+          <p className="text-gray-500 dark:text-gray-400">{data.student.email}</p>
         </div>
 
         <section>
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Courses</h2>
-          <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4 dark:text-gray-100">Courses</h2>
+          <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+              <thead className="bg-gray-50 dark:bg-gray-800">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
                     Name
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
                     Expiry
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                 {data.courses.length === 0 && (
                   <tr>
-                    <td colSpan={3} className="px-6 py-8 text-center text-gray-500">
+                    <td colSpan={3} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
                       No course access granted yet.
                     </td>
                   </tr>
                 )}
 
                 {data.courses.map((grant) => (
-                  <tr key={grant.grantId} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900">{grant.course.name}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{formatDate(grant.expiresAt)}</td>
+                  <tr key={grant.grantId} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">{grant.course.name}</td>
+                    <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{formatDate(grant.expiresAt)}</td>
                     <td className="px-6 py-4 text-right text-sm">
                       <button
                         type="button"
                         onClick={() => setEditing({ type: 'course', grant })}
-                        className="text-purple-600 hover:text-purple-800 mr-3"
+                        className="text-purple-600 hover:text-purple-800 mr-3 dark:text-purple-400 dark:hover:text-purple-300"
                       >
                         <PencilSquareIcon className="h-5 w-5 inline" />
                       </button>
                       <button
                         type="button"
                         onClick={() => handleDeleteCourse(grant.grantId)}
-                        className="text-red-500 hover:text-red-700"
+                        className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                       >
                         <TrashIcon className="h-5 w-5 inline" />
                       </button>
@@ -170,51 +170,51 @@ const StudentDetail = () => {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Lectures</h2>
-          <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4 dark:text-gray-100">Lectures</h2>
+          <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+              <thead className="bg-gray-50 dark:bg-gray-800">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
                     Name
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
                     Course
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
                     Expiry
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                 {data.lectures.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
+                    <td colSpan={4} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
                       No lecture access granted yet.
                     </td>
                   </tr>
                 )}
 
                 {data.lectures.map((grant) => (
-                  <tr key={grant.grantId} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900">{grant.lecture.name}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{grant.lecture.course?.name || '-'}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{formatDate(grant.expiresAt)}</td>
+                  <tr key={grant.grantId} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">{grant.lecture.name}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{grant.lecture.course?.name || '-'}</td>
+                    <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{formatDate(grant.expiresAt)}</td>
                     <td className="px-6 py-4 text-right text-sm">
                       <button
                         type="button"
                         onClick={() => setEditing({ type: 'lecture', grant })}
-                        className="text-purple-600 hover:text-purple-800 mr-3"
+                        className="text-purple-600 hover:text-purple-800 mr-3 dark:text-purple-400 dark:hover:text-purple-300"
                       >
                         <PencilSquareIcon className="h-5 w-5 inline" />
                       </button>
                       <button
                         type="button"
                         onClick={() => handleDeleteLecture(grant.grantId)}
-                        className="text-red-500 hover:text-red-700"
+                        className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                       >
                         <TrashIcon className="h-5 w-5 inline" />
                       </button>

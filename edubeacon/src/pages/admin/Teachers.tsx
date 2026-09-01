@@ -53,57 +53,57 @@ const Teachers = () => {
 
   return (
     <AdminLayout>
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Teachers</h1>
+      <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6">Teachers</h1>
 
-      {isLoading && <p className="text-gray-600">Loading teachers...</p>}
-      {error && <p className="text-red-600">{error}</p>}
+      {isLoading && <p className="text-gray-600 dark:text-gray-400">Loading teachers...</p>}
+      {error && <p className="text-red-600 dark:text-red-400">{error}</p>}
 
       {!isLoading && !error && (
-        <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="overflow-x-auto rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+            <thead className="bg-gray-50 dark:bg-gray-800">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   #
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Name
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Num Courses
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Date Joined
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Activated
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
               {teachers.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan={5} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
                     No teachers yet.
                   </td>
                 </tr>
               )}
 
               {teachers.map((teacher, index) => (
-                <tr key={teacher._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm text-gray-500">
+                <tr key={teacher._id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                     {(page - 1) * TEACHERS_PER_PAGE + index + 1}
                   </td>
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">{teacher.name}</td>
-                  <td className="px-6 py-4 text-sm text-gray-700">{teacher.numCourses}</td>
-                  <td className="px-6 py-4 text-sm text-gray-700">
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">{teacher.name}</td>
+                  <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{teacher.numCourses}</td>
+                  <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
                     {new Date(teacher.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 text-sm">
                     {teacher.isVerified ? (
-                      <CheckCircleIcon className="h-5 w-5 text-green-600" />
+                      <CheckCircleIcon className="h-5 w-5 text-green-600 dark:text-green-400" />
                     ) : (
-                      <XCircleIcon className="h-5 w-5 text-red-500" />
+                      <XCircleIcon className="h-5 w-5 text-red-500 dark:text-red-400" />
                     )}
                   </td>
                 </tr>
@@ -119,12 +119,12 @@ const Teachers = () => {
             type="button"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1 || isLoading}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             <ChevronLeftIcon className="h-4 w-4" />
           </button>
 
-          <span className="text-sm text-gray-600">
+          <span className="text-sm text-gray-600 dark:text-gray-400">
             Page {page} of {totalPages}
           </span>
 
@@ -132,7 +132,7 @@ const Teachers = () => {
             type="button"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages || isLoading}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             <ChevronRightIcon className="h-4 w-4" />
           </button>

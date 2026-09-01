@@ -1,4 +1,5 @@
 import NotificationBell from './NotificationBell';
+import ThemeToggle from '../ThemeToggle';
 
 interface HeaderProps {
     onToggle: () => void;
@@ -31,7 +32,8 @@ interface HeaderProps {
           </div>
         </div>
 
-        <div className="ml-auto flex items-center">
+        <div className="ml-auto flex items-center gap-2">
+          <ThemeToggle className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors" />
           <NotificationBell />
         </div>
       </header>

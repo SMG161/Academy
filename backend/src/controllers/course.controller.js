@@ -27,7 +27,7 @@ exports.createCourse = async (req, res) => {
 // Get all courses (paginated)
 exports.getAllCourses = async (req, res) => {
   try {
-    const { page, limit, skip } = getPagination(req, { defaultLimit: 20, maxLimit: 100 });
+    const { page, limit, skip } = getPagination(req, { defaultLimit: 27, maxLimit: 27 });
 
     const [courses, total] = await Promise.all([
       Course.find()

@@ -112,19 +112,19 @@ const GrantAccessModal = ({ isOpen, mode, studentId, onClose, onGranted }: Grant
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto dark:bg-gray-900">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             {mode === 'course' ? 'Give Course Access' : 'Give Lecture Access'}
           </h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl font-bold">
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl font-bold dark:text-gray-400 dark:hover:text-gray-200">
             ×
           </button>
         </div>
 
         {error && (
-          <div className="mb-4 bg-red-100 border border-red-400 rounded-md p-3">
-            <div className="bg-red-200 text-red-800 text-sm font-medium px-3 py-2 rounded">{error}</div>
+          <div className="mb-4 bg-red-100 border border-red-400 rounded-md p-3 dark:bg-red-950/40 dark:border-red-800">
+            <div className="bg-red-200 text-red-800 text-sm font-medium px-3 py-2 rounded dark:bg-red-900/40 dark:text-red-300">{error}</div>
           </div>
         )}
 
@@ -135,14 +135,14 @@ const GrantAccessModal = ({ isOpen, mode, studentId, onClose, onGranted }: Grant
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder={mode === 'course' ? 'Search courses...' : 'Search lectures...'}
-            className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+            className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-500"
           />
         </div>
 
-        <div className="border border-gray-200 rounded-lg divide-y divide-gray-100 max-h-56 overflow-y-auto mb-6">
-          {isLoading && <p className="text-gray-500 text-sm p-4">Loading...</p>}
+        <div className="border border-gray-200 rounded-lg divide-y divide-gray-100 max-h-56 overflow-y-auto mb-6 dark:border-gray-700 dark:divide-gray-800">
+          {isLoading && <p className="text-gray-500 text-sm p-4 dark:text-gray-400">Loading...</p>}
           {!isLoading && items.length === 0 && (
-            <p className="text-gray-500 text-sm p-4">
+            <p className="text-gray-500 text-sm p-4 dark:text-gray-400">
               {mode === 'course' ? 'No courses available to grant.' : 'No lectures available to grant.'}
             </p>
           )}
@@ -153,21 +153,21 @@ const GrantAccessModal = ({ isOpen, mode, studentId, onClose, onGranted }: Grant
                 type="button"
                 onClick={() => setSelectedId(item._id)}
                 className={`w-full text-left px-4 py-3 flex items-center justify-between transition-colors ${
-                  selectedId === item._id ? 'bg-purple-50' : 'hover:bg-gray-50'
+                  selectedId === item._id ? 'bg-purple-50 dark:bg-purple-950/40' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
                 }`}
               >
                 <div>
-                  <p className="text-sm font-medium text-gray-900">{item.name}</p>
-                  {item.course && <p className="text-xs text-gray-500">Part of {item.course.name}</p>}
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{item.name}</p>
+                  {item.course && <p className="text-xs text-gray-500 dark:text-gray-400">Part of {item.course.name}</p>}
                 </div>
-                <span className="text-sm text-gray-600">Rs. {item.price}</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">Rs. {item.price}</span>
               </button>
             ))}
         </div>
 
         {selectedId && (
           <div className="mb-6">
-            <p className="text-sm font-medium text-gray-700 mb-2">Access expires on</p>
+            <p className="text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">Access expires on</p>
             <Calendar selectedDate={selectedDate} onSelect={setSelectedDate} />
           </div>
         )}

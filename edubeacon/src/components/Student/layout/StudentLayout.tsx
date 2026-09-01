@@ -10,7 +10,7 @@ const StudentLayout = ({ children }: StudentLayoutProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-blue-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
       {/* Fixed Header */}
       <StudentHeader onToggle={() => setIsCollapsed((prev) => !prev)} />
 

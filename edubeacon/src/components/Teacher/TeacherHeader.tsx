@@ -1,3 +1,5 @@
+import ThemeToggle from '../ThemeToggle';
+
 interface HeaderProps {
   onToggle: () => void;
 }
@@ -28,6 +30,8 @@ const TeacherHeader = ({ onToggle }: HeaderProps) => {
           </div>
         </div>
       </div>
+
+      <ThemeToggle className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors" />
     </header>
   );
 };

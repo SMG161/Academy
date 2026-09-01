@@ -69,7 +69,7 @@ const ManageStudents = () => {
   return (
     <TeacherLayout>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Manage Students</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Manage Students</h1>
 
         <div className="relative w-full sm:w-72">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -78,34 +78,34 @@ const ManageStudents = () => {
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Search any student by email..."
-            className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+            className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-500"
           />
         </div>
       </div>
 
-      {isLoading && <p className="text-gray-600">Loading students...</p>}
-      {error && <p className="text-red-600">{error}</p>}
+      {isLoading && <p className="text-gray-600 dark:text-gray-400">Loading students...</p>}
+      {error && <p className="text-red-600 dark:text-red-400">{error}</p>}
 
       {!isLoading && !error && (
-        <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+            <thead className="bg-gray-50 dark:bg-gray-800">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
                   #
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
                   Name
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
                   Email
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
               {students.length === 0 && (
                 <tr>
-                  <td colSpan={3} className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan={3} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
                     {search ? 'No students found with that email.' : 'No students enrolled in your courses yet.'}
                   </td>
                 </tr>
@@ -115,13 +115,13 @@ const ManageStudents = () => {
                 <tr
                   key={student._id}
                   onClick={() => navigate(`/teacher/student/${student._id}`)}
-                  className="hover:bg-gray-50 cursor-pointer"
+                  className="hover:bg-gray-50 cursor-pointer dark:hover:bg-gray-800"
                 >
-                  <td className="px-6 py-4 text-sm text-gray-500">
+                  <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                     {(page - 1) * STUDENTS_PER_PAGE + index + 1}
                   </td>
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">{student.name}</td>
-                  <td className="px-6 py-4 text-sm text-gray-700">{student.email}</td>
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">{student.name}</td>
+                  <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{student.email}</td>
                 </tr>
               ))}
             </tbody>
@@ -134,12 +134,12 @@ const ManageStudents = () => {
           type="button"
           onClick={() => setPage((p) => Math.max(1, p - 1))}
           disabled={page <= 1 || isLoading}
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
         >
           <ChevronLeftIcon className="h-4 w-4" />
         </button>
 
-        <span className="text-sm text-gray-600">
+        <span className="text-sm text-gray-600 dark:text-gray-400">
           Page {page} of {totalPages}
         </span>
 
@@ -147,7 +147,7 @@ const ManageStudents = () => {
           type="button"
           onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
           disabled={page >= totalPages || isLoading}
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
         >
           <ChevronRightIcon className="h-4 w-4" />
         </button>

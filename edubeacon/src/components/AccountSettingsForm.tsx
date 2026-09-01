@@ -117,26 +117,26 @@ const AccountSettingsForm = () => {
     }
   };
 
-  if (isLoading) return <p className="text-gray-600">Loading account settings...</p>;
-  if (loadError) return <p className="text-red-600">{loadError}</p>;
+  if (isLoading) return <p className="text-gray-600 dark:text-gray-400">Loading account settings...</p>;
+  if (loadError) return <p className="text-red-600 dark:text-red-400">{loadError}</p>;
   if (!account) return null;
 
   return (
     <div className="space-y-10 max-w-2xl">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Account Settings</h1>
-        <p className="text-gray-500">Manage your profile and password.</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Account Settings</h1>
+        <p className="text-gray-500 dark:text-gray-400">Manage your profile and password.</p>
       </div>
 
-      <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Profile</h2>
+      <section className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-6">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Profile</h2>
 
-        {nameMessage && <p className="text-sm text-green-600 mb-3">{nameMessage}</p>}
-        {nameError && <p className="text-sm text-red-600 mb-3">{nameError}</p>}
+        {nameMessage && <p className="text-sm text-green-600 dark:text-green-400 mb-3">{nameMessage}</p>}
+        {nameError && <p className="text-sm text-red-600 dark:text-red-400 mb-3">{nameError}</p>}
 
         <form onSubmit={handleSaveName} className="space-y-4">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Name
             </label>
             <input
@@ -144,18 +144,18 @@ const AccountSettingsForm = () => {
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
             <input
               type="email"
               value={account.email}
               disabled
-              className="w-full px-4 py-2 border border-gray-200 bg-gray-50 text-gray-500 rounded-md"
+              className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-md"
             />
           </div>
 
@@ -169,15 +169,20 @@ const AccountSettingsForm = () => {
         </form>
       </section>
 
-      <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Change Password</h2>
+      <section className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-6">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Change Password</h2>
 
-        {passwordMessage && <p className="text-sm text-green-600 mb-3">{passwordMessage}</p>}
-        {passwordError && <p className="text-sm text-red-600 mb-3">{passwordError}</p>}
+        {passwordMessage && (
+          <p className="text-sm text-green-600 dark:text-green-400 mb-3">{passwordMessage}</p>
+        )}
+        {passwordError && <p className="text-sm text-red-600 dark:text-red-400 mb-3">{passwordError}</p>}
 
         <form onSubmit={handleChangePassword} className="space-y-4">
           <div>
-            <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="currentPassword"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
               Current password
             </label>
             <input
@@ -185,13 +190,13 @@ const AccountSettingsForm = () => {
               id="currentPassword"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               New password
             </label>
             <input
@@ -199,13 +204,16 @@ const AccountSettingsForm = () => {
               id="newPassword"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="confirmNewPassword" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="confirmNewPassword"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
               Confirm new password
             </label>
             <input
@@ -213,7 +221,7 @@ const AccountSettingsForm = () => {
               id="confirmNewPassword"
               value={confirmNewPassword}
               onChange={(e) => setConfirmNewPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
               required
             />
           </div>

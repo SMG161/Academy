@@ -41,30 +41,30 @@ const Calendar = ({ selectedDate, onSelect, minDate = tomorrow() }: CalendarProp
   ];
 
   return (
-    <div className="border border-gray-200 rounded-lg p-4 w-full max-w-sm">
+    <div className="border border-gray-200 rounded-lg p-4 w-full max-w-sm dark:border-gray-700">
       <div className="flex items-center justify-between mb-3">
         <button
           type="button"
           onClick={() => setViewDate(new Date(year, month - 1, 1))}
-          className="p-1 rounded-full hover:bg-gray-100"
+          className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
         >
-          <ChevronLeftIcon className="h-4 w-4 text-gray-600" />
+          <ChevronLeftIcon className="h-4 w-4 text-gray-600 dark:text-gray-400" />
         </button>
-        <p className="text-sm font-semibold text-gray-900">
+        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
           {MONTH_LABELS[month]} {year}
         </p>
         <button
           type="button"
           onClick={() => setViewDate(new Date(year, month + 1, 1))}
-          className="p-1 rounded-full hover:bg-gray-100"
+          className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
         >
-          <ChevronRightIcon className="h-4 w-4 text-gray-600" />
+          <ChevronRightIcon className="h-4 w-4 text-gray-600 dark:text-gray-400" />
         </button>
       </div>
 
       <div className="grid grid-cols-7 gap-1 mb-1">
         {DAY_LABELS.map((label) => (
-          <div key={label} className="text-center text-xs font-medium text-gray-400">
+          <div key={label} className="text-center text-xs font-medium text-gray-400 dark:text-gray-500">
             {label}
           </div>
         ))}
@@ -88,8 +88,8 @@ const Calendar = ({ selectedDate, onSelect, minDate = tomorrow() }: CalendarProp
                 isSelected
                   ? 'bg-purple-600 text-white font-semibold'
                   : isDisabled
-                    ? 'text-gray-300 cursor-not-allowed'
-                    : 'text-gray-700 hover:bg-purple-50'
+                    ? 'text-gray-300 cursor-not-allowed dark:text-gray-700'
+                    : 'text-gray-700 hover:bg-purple-50 dark:text-gray-300 dark:hover:bg-purple-950/40'
               }`}
             >
               {date.getDate()}

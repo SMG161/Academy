@@ -50,12 +50,12 @@ const SetPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-purple-50 to-blue-50 px-4">
-      <div className="bg-white rounded-2xl shadow-md p-10 w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-purple-50 to-blue-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 px-4">
+      <div className="bg-white rounded-2xl shadow-md p-10 w-full max-w-md dark:bg-gray-900">
         {success ? (
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Account activated!</h1>
-            <p className="text-gray-500 mb-6">You can now sign in with your new password.</p>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2 dark:text-gray-100">Account activated!</h1>
+            <p className="text-gray-500 mb-6 dark:text-gray-400">You can now sign in with your new password.</p>
             <button
               type="button"
               onClick={() => navigate('/')}
@@ -66,20 +66,20 @@ const SetPassword = () => {
           </div>
         ) : (
           <>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2 text-center">Welcome to EduBeacon</h1>
-            <p className="text-gray-500 text-sm mb-6 text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2 text-center dark:text-gray-100">Welcome to EduBeacon</h1>
+            <p className="text-gray-500 text-sm mb-6 text-center dark:text-gray-400">
               Set a password to activate your teacher account.
             </p>
 
             {!token && (
-              <p className="text-red-600 text-sm mb-4 text-center">
+              <p className="text-red-600 text-sm mb-4 text-center dark:text-red-400">
                 Missing or invalid invite link.
               </p>
             )}
 
             {error && (
-              <div className="mb-4 bg-red-100 border border-red-400 rounded-md p-3">
-                <div className="bg-red-200 text-red-800 text-sm font-medium px-3 py-2 rounded">
+              <div className="mb-4 bg-red-100 border border-red-400 rounded-md p-3 dark:bg-red-950/40 dark:border-red-800">
+                <div className="bg-red-200 text-red-800 text-sm font-medium px-3 py-2 rounded dark:bg-red-900/40 dark:text-red-300">
                   {error}
                 </div>
               </div>
@@ -87,7 +87,7 @@ const SetPassword = () => {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
                   Password
                 </label>
                 <input
@@ -95,7 +95,7 @@ const SetPassword = () => {
                   id="newPassword"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-500"
                   required
                 />
               </div>
@@ -103,7 +103,7 @@ const SetPassword = () => {
               <div>
                 <label
                   htmlFor="confirmNewPassword"
-                  className="block text-sm font-medium text-gray-700 mb-2"
+                  className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300"
                 >
                   Confirm password
                 </label>
@@ -112,7 +112,7 @@ const SetPassword = () => {
                   id="confirmNewPassword"
                   value={confirmNewPassword}
                   onChange={(e) => setConfirmNewPassword(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-500"
                   required
                 />
               </div>

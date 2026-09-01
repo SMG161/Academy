@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from './context/ThemeContext';
 import Landing from './pages/Landing';
 import VerifyEmail from './pages/VerifyEmail';
 import ResetPassword from './pages/ResetPassword';
@@ -9,6 +10,9 @@ import TeacherProtectedRoute from './components/TeacherProtectedRoute';
 import StudentDashboard from './pages/students/StudentDashboard';
 import CourseDetails from './pages/students/CourseDetails';
 import LectureDetails from './pages/students/LectureDetails';
+import MyCourses from './pages/students/MyCourses';
+import MyLectures from './pages/students/MyLectures';
+import BrowseCourses from './pages/students/BrowseCourses';
 import AdminLanding from './pages/admin/AdminLanding';
 import Teachers from './pages/admin/Teachers';
 import TeacherDashboard from './pages/teacher/TeacherDashboard';
@@ -21,6 +25,7 @@ import TeacherAccountSettings from './pages/teacher/AccountSettings';
 
 function App() {
   return (
+    <ThemeProvider>
     <Router>
       <Routes>
         <Route path="/" element={<Landing />} />
@@ -31,6 +36,9 @@ function App() {
         {/* Protected student routes */}
         <Route element={<StudentProtectedRoute />}>
           <Route path="/student/dashboard" element={<StudentDashboard />} />
+          <Route path="/student/courses" element={<MyCourses />} />
+          <Route path="/student/lectures" element={<MyLectures />} />
+          <Route path="/student/browse-courses" element={<BrowseCourses />} />
           <Route path="/student/course/:id" element={<CourseDetails />} />
           <Route path="/student/lecture/:id" element={<LectureDetails />} />
           <Route path="/student/settings" element={<StudentAccountSettings />} />
@@ -53,6 +61,7 @@ function App() {
         </Route>
       </Routes>
     </Router>
+    </ThemeProvider>
   );
 }
 

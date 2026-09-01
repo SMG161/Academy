@@ -4,7 +4,7 @@ interface HeroProps {
 
 const Hero = ({ onEnrollNowClick }: HeroProps) => {
   return (
-    <section className="py-16 px-4 bg-white">
+    <section className="py-16 px-4 bg-white dark:bg-gray-950">
       <div className="container mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
@@ -14,19 +14,19 @@ const Hero = ({ onEnrollNowClick }: HeroProps) => {
             
             <div className="space-y-6">
               <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
-                <span className="text-gray-600 font-normal">E-learning</span>{' '}
-                <span className="text-blue-600">Education Platform</span>{' '}
-                <span className="text-purple-600">in Your City</span>
+                <span className="text-gray-600 font-normal dark:text-gray-400">E-learning</span>{' '}
+                <span className="text-blue-600 dark:text-blue-400">Education Platform</span>{' '}
+                <span className="text-purple-600 dark:text-purple-400">in Your City</span>
               </h1>
-              
-              <p className="text-lg text-gray-600 leading-relaxed">
+
+              <p className="text-lg text-gray-600 leading-relaxed dark:text-gray-400">
                 Learn from Experts. Grow Your Skills. Shape Your Future.
               </p>
-              
-              <p className="text-gray-600 leading-relaxed">
+
+              <p className="text-gray-600 leading-relaxed dark:text-gray-400">
                 Access high-quality courses, expert-led lectures, and practical resources designed to help you learn faster and smarter. Whether you're a student looking to build new skills or a professional aiming to advance your career, our platform connects you with experienced teachers and structured learning paths you can trust.
               </p>
-              
+
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <button
                   onClick={onEnrollNowClick}
@@ -34,7 +34,7 @@ const Hero = ({ onEnrollNowClick }: HeroProps) => {
                 >
                   Enroll Now
                 </button>
-                <button className="bg-white text-purple-600 border-2 border-purple-600 px-8 py-4 rounded-md font-semibold text-lg hover:bg-purple-50 transition-colors">
+                <button className="bg-white text-purple-600 border-2 border-purple-600 px-8 py-4 rounded-md font-semibold text-lg hover:bg-purple-50 transition-colors dark:bg-gray-950 dark:hover:bg-gray-900">
                   Buy Course
                 </button>
               </div>

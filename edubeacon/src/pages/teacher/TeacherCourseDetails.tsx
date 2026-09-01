@@ -47,9 +47,9 @@ const TeacherCourseDetails = () => {
     fetchCourse();
   }, [fetchCourse]);
 
-  if (isLoading) return <TeacherLayout><p className="text-gray-600">Loading course...</p></TeacherLayout>;
-  if (error) return <TeacherLayout><p className="text-red-600">{error}</p></TeacherLayout>;
-  if (!course) return <TeacherLayout><p className="text-gray-600">Course not found.</p></TeacherLayout>;
+  if (isLoading) return <TeacherLayout><p className="text-gray-600 dark:text-gray-400">Loading course...</p></TeacherLayout>;
+  if (error) return <TeacherLayout><p className="text-red-600 dark:text-red-400">{error}</p></TeacherLayout>;
+  if (!course) return <TeacherLayout><p className="text-gray-600 dark:text-gray-400">Course not found.</p></TeacherLayout>;
 
   const token = localStorage.getItem('authToken');
   const decoded = token ? decodeToken(token) : null;
@@ -60,30 +60,30 @@ const TeacherCourseDetails = () => {
     <TeacherLayout>
       <div className="space-y-8">
         <div>
-          <h1 className="text-4xl lg:text-5xl font-bold leading-tight text-gray-900">
+          <h1 className="text-4xl lg:text-5xl font-bold leading-tight text-gray-900 dark:text-gray-100">
             {course.name}
           </h1>
-          <p className="text-purple-600 font-semibold mt-2">Rs. {course.price}</p>
-          <p className="text-gray-600 mt-4 max-w-3xl">
+          <p className="text-purple-600 font-semibold mt-2 dark:text-purple-400">Rs. {course.price}</p>
+          <p className="text-gray-600 mt-4 max-w-3xl dark:text-gray-400">
             {course.description || 'No description added yet.'}
           </p>
         </div>
 
-        <div className="w-full bg-white rounded-xl shadow-md divide-y divide-gray-100">
+        <div className="w-full bg-white rounded-xl shadow-md divide-y divide-gray-100 dark:bg-gray-900 dark:divide-gray-800">
           {lectures.length === 0 && (
-            <p className="text-gray-500 text-sm p-6">No lectures added to this course yet.</p>
+            <p className="text-gray-500 text-sm p-6 dark:text-gray-400">No lectures added to this course yet.</p>
           )}
 
           {lectures.map((lecture) => (
             <div
               key={lecture._id}
-              className="flex items-center justify-between gap-4 p-4 hover:bg-gray-50 transition-colors"
+              className="flex items-center justify-between gap-4 p-4 hover:bg-gray-50 transition-colors dark:hover:bg-gray-800"
             >
               <div className="flex items-center gap-3">
-                <VideoCameraIcon className="h-5 w-5 text-purple-600 flex-shrink-0" />
-                <span className="text-gray-900 font-medium">{lecture.name}</span>
+                <VideoCameraIcon className="h-5 w-5 text-purple-600 flex-shrink-0 dark:text-purple-400" />
+                <span className="text-gray-900 font-medium dark:text-gray-100">{lecture.name}</span>
               </div>
-              <span className="text-sm text-gray-500 flex-shrink-0">Rs. {lecture.price}</span>
+              <span className="text-sm text-gray-500 flex-shrink-0 dark:text-gray-400">Rs. {lecture.price}</span>
             </div>
           ))}
         </div>

@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Cog6ToothIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
+import ThemeToggle from '../ThemeToggle';
 
 interface NavItem {
   label: string;
@@ -56,6 +57,8 @@ const AdminHeader = () => {
       </nav>
 
       <div className="flex items-center gap-2">
+        <ThemeToggle className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors" />
+
         <button
           type="button"
           className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"

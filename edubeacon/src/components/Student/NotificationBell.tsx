@@ -103,14 +103,14 @@ const NotificationBell = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto rounded-xl bg-white text-gray-900 shadow-xl ring-1 ring-black/5 z-50">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+        <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-xl ring-1 ring-black/5 dark:ring-white/10 z-50">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800">
             <p className="text-sm font-semibold">Notifications</p>
             {unreadCount > 0 && (
               <button
                 type="button"
                 onClick={markAllAsRead}
-                className="text-xs font-medium text-purple-600 hover:text-purple-700"
+                className="text-xs font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300"
               >
                 Mark all as read
               </button>
@@ -118,26 +118,38 @@ const NotificationBell = () => {
           </div>
 
           {isLoading && notifications.length === 0 && (
-            <p className="px-4 py-6 text-center text-sm text-gray-500">Loading...</p>
+            <p className="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">Loading...</p>
           )}
 
           {!isLoading && notifications.length === 0 && (
-            <p className="px-4 py-6 text-center text-sm text-gray-500">No notifications yet.</p>
+            <p className="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+              No notifications yet.
+            </p>
           )}
 
-          <ul className="divide-y divide-gray-100">
+          <ul className="divide-y divide-gray-100 dark:divide-gray-800">
             {notifications.map((notification) => (
               <li
                 key={notification._id}
                 onClick={() => !notification.read && markAsRead(notification._id)}
                 className={`px-4 py-3 text-sm cursor-pointer transition-colors ${
-                  notification.read ? 'bg-white' : 'bg-purple-50 hover:bg-purple-100'
+                  notification.read
+                    ? 'bg-white dark:bg-gray-900'
+                    : 'bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/30 dark:hover:bg-purple-950/50'
                 }`}
               >
-                <p className={notification.read ? 'text-gray-600' : 'text-gray-900 font-medium'}>
+                <p
+                  className={
+                    notification.read
+                      ? 'text-gray-600 dark:text-gray-400'
+                      : 'text-gray-900 dark:text-gray-100 font-medium'
+                  }
+                >
                   {notification.message}
                 </p>
-                <p className="mt-1 text-xs text-gray-400">{timeAgo(notification.createdAt)}</p>
+                <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                  {timeAgo(notification.createdAt)}
+                </p>
               </li>
             ))}
           </ul>

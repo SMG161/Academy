@@ -60,26 +60,26 @@ const VerifyEmail = () => {
   }, [searchParams, navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-purple-50 to-blue-50 px-4">
-      <div className="bg-white rounded-2xl shadow-md p-10 w-full max-w-md text-center">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-purple-50 to-blue-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 px-4">
+      <div className="bg-white rounded-2xl shadow-md p-10 w-full max-w-md text-center dark:bg-gray-900">
         {status === 'verifying' && (
           <>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Verifying your email...</h1>
-            <p className="text-gray-500">Hang tight, this will only take a moment.</p>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2 dark:text-gray-100">Verifying your email...</h1>
+            <p className="text-gray-500 dark:text-gray-400">Hang tight, this will only take a moment.</p>
           </>
         )}
 
         {status === 'success' && (
           <>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Email verified!</h1>
-            <p className="text-gray-500">Redirecting you to your dashboard...</p>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2 dark:text-gray-100">Email verified!</h1>
+            <p className="text-gray-500 dark:text-gray-400">Redirecting you to your dashboard...</p>
           </>
         )}
 
         {status === 'error' && (
           <>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Verification failed</h1>
-            <p className="text-red-600 mb-6">{error}</p>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2 dark:text-gray-100">Verification failed</h1>
+            <p className="text-red-600 mb-6 dark:text-red-400">{error}</p>
             <button
               type="button"
               onClick={() => navigate('/')}

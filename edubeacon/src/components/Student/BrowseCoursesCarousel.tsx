@@ -39,15 +39,15 @@ const BrowseCoursesCarousel = () => {
     fetchCourses();
   }, []);
 
-  if (isLoading) return <p className="text-gray-600">Loading courses...</p>;
-  if (error) return <p className="text-red-600">{error}</p>;
+  if (isLoading) return <p className="text-gray-600 dark:text-gray-400">Loading courses...</p>;
+  if (error) return <p className="text-red-600 dark:text-red-400">{error}</p>;
 
   return (
     <CourseCarousel
       title={
         <>
-          <span className="text-gray-600">Browse</span>{' '}
-          <span className="text-purple-600">Courses</span>
+          <span className="text-gray-600 dark:text-gray-300">Browse</span>{' '}
+          <span className="text-purple-600 dark:text-purple-400">Courses</span>
         </>
       }
       courses={courses}

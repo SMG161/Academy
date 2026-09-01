@@ -71,7 +71,7 @@ const ManageCourses = () => {
   return (
     <TeacherLayout>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Manage Courses</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Manage Courses</h1>
 
         <div className="relative w-full sm:w-72">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -80,18 +80,18 @@ const ManageCourses = () => {
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Search your courses..."
-            className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+            className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-500"
           />
         </div>
       </div>
 
-      {isLoading && <p className="text-gray-600">Loading courses...</p>}
-      {error && <p className="text-red-600">{error}</p>}
+      {isLoading && <p className="text-gray-600 dark:text-gray-400">Loading courses...</p>}
+      {error && <p className="text-red-600 dark:text-red-400">{error}</p>}
 
       {!isLoading && !error && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {courses.length === 0 && (
-            <p className="text-gray-500 col-span-full">
+            <p className="text-gray-500 dark:text-gray-400 col-span-full">
               {search ? 'No courses match your search.' : 'You have not created any courses yet.'}
             </p>
           )}
@@ -100,18 +100,18 @@ const ManageCourses = () => {
             <div
               key={course._id}
               onClick={() => navigate(`/teacher/course/${course._id}`)}
-              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all"
+              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all dark:bg-gray-900 dark:border-gray-700"
             >
-              <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">{course.name}</h3>
-              <p className="text-gray-500 text-sm mt-1 line-clamp-2 min-h-[2.5rem]">
+              <h3 className="text-lg font-semibold text-gray-900 line-clamp-1 dark:text-gray-100">{course.name}</h3>
+              <p className="text-gray-500 text-sm mt-1 line-clamp-2 min-h-[2.5rem] dark:text-gray-400">
                 {course.description || 'No description added yet.'}
               </p>
 
               <div className="mt-4 flex items-center justify-between text-sm">
-                <span className="text-gray-600">
+                <span className="text-gray-600 dark:text-gray-400">
                   {course.numLectures} {course.numLectures === 1 ? 'lecture' : 'lectures'}
                 </span>
-                <span className="font-semibold text-purple-600">Rs. {course.price}</span>
+                <span className="font-semibold text-purple-600 dark:text-purple-400">Rs. {course.price}</span>
               </div>
             </div>
           ))}
@@ -124,12 +124,12 @@ const ManageCourses = () => {
             type="button"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1 || isLoading}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
           >
             <ChevronLeftIcon className="h-4 w-4" />
           </button>
 
-          <span className="text-sm text-gray-600">
+          <span className="text-sm text-gray-600 dark:text-gray-400">
             Page {page} of {totalPages}
           </span>
 
@@ -137,7 +137,7 @@ const ManageCourses = () => {
             type="button"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages || isLoading}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
           >
             <ChevronRightIcon className="h-4 w-4" />
           </button>

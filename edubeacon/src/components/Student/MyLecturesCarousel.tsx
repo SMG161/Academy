@@ -41,17 +41,17 @@ const MyLecturesCarousel = () => {
     fetchMyLectures();
   }, []);
 
-  if (isLoading) return <p className="text-gray-600">Loading your lectures...</p>;
-  if (error) return <p className="text-red-600">{error}</p>;
+  if (isLoading) return <p className="text-gray-600 dark:text-gray-400">Loading your lectures...</p>;
+  if (error) return <p className="text-red-600 dark:text-red-400">{error}</p>;
 
   return (
     <LectureCarousel
       title={
         <span className="inline-flex items-center gap-2">
-          <span className="text-gray-600">My</span>{' '}
-          <span className="text-purple-600">Lectures</span>
+          <span className="text-gray-600 dark:text-gray-300">My</span>{' '}
+          <span className="text-purple-600 dark:text-purple-400">Lectures</span>
           <span title="Lectures you have bought that are independent of your full courses">
-            <InformationCircleIcon className="h-6 w-6 text-gray-400 cursor-help" />
+            <InformationCircleIcon className="h-6 w-6 text-gray-400 dark:text-gray-500 cursor-help" />
           </span>
         </span>
       }

@@ -10,7 +10,7 @@ const Landing = () => {
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-white dark:bg-gray-950">
       <Header 
         onSignInClick={() => setIsSignInOpen(true)}
         onSignUpClick={() => setIsSignUpOpen(true)}
