@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Landing from './pages/Landing';
 import VerifyEmail from './pages/VerifyEmail';
 import ResetPassword from './pages/ResetPassword';
+import SetPassword from './pages/SetPassword';
 import StudentProtectedRoute from './components/StudentProtectedRoute';
 import AdminProtectedRoute from './components/AdminProtectedRoute';
 import TeacherProtectedRoute from './components/TeacherProtectedRoute';
@@ -25,6 +26,7 @@ function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/set-password" element={<SetPassword />} />
 
         {/* Protected student routes */}
         <Route element={<StudentProtectedRoute />}>

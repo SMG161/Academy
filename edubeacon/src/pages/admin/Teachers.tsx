@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import { ChevronLeftIcon, ChevronRightIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 import AdminLayout from '../../components/Admin/AdminLayout';
 import AddTeacherModal from '../../components/Admin/AddTeacherModal';
 import type { Teacher } from '../../types/teacher';
@@ -75,12 +75,15 @@ const Teachers = () => {
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   Date Joined
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  Activated
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {teachers.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
                     No teachers yet.
                   </td>
                 </tr>
@@ -95,6 +98,13 @@ const Teachers = () => {
                   <td className="px-6 py-4 text-sm text-gray-700">{teacher.numCourses}</td>
                   <td className="px-6 py-4 text-sm text-gray-700">
                     {new Date(teacher.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 text-sm">
+                    {teacher.isVerified ? (
+                      <CheckCircleIcon className="h-5 w-5 text-green-600" />
+                    ) : (
+                      <XCircleIcon className="h-5 w-5 text-red-500" />
+                    )}
                   </td>
                 </tr>
               ))}

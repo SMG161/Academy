@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 
 require('./models/Student.model');
 require('./models/Admin.model');
@@ -15,6 +16,10 @@ const uploadRoutes = require('./routes/upload.routes');
 const accountRoutes = require('./routes/account.routes');
 
 const app = express();
+
+app.set('trust proxy', 1);
+
+app.use(helmet());
 
 app.use(
   cors({

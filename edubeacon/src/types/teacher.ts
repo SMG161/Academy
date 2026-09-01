@@ -4,4 +4,5 @@ export interface Teacher {
   email: string;
   numCourses: number;
   createdAt: string;
+  isVerified: boolean;
 }

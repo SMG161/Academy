@@ -4,8 +4,12 @@ const { hashPassword, comparePassword } = require('../utils/hash');
 const { signToken } = require('../utils/jwt');
 const { sendVerificationEmail, sendOtpEmail, sendPasswordResetEmail } = require('../utils/email');
 const { generateVerificationToken, hashToken, generateOtpCode } = require('../utils/otp');
+const { getPasswordPolicyError } = require('../utils/passwordPolicy');
 
 const OTP_REQUIRED_ROLES = new Set(['student']);
+const MAX_FAILED_LOGIN_ATTEMPTS = 5;
+const LOGIN_LOCK_MS = 15 * 60 * 1000;
+const MAX_OTP_ATTEMPTS = 5;
 
 // Add an entry here for each new role (e.g. teacher, admin) as its model is created.
 const ROLE_MODELS = {
@@ -31,6 +35,9 @@ function sanitizeUser(user) {
   delete userObj.otpExpires;
   delete userObj.resetPasswordTokenHash;
   delete userObj.resetPasswordExpires;
+  delete userObj.failedLoginAttempts;
+  delete userObj.lockUntil;
+  delete userObj.otpAttempts;
   return userObj;
 }
 
@@ -48,14 +55,32 @@ async function signup(req, res) {
   try {
     const { name, email, username, password, confirmPassword, role = 'student' } = req.body;
 
-    if (!name || !email || !password || !confirmPassword) {
+    if (
+      typeof name !== 'string' ||
+      typeof email !== 'string' ||
+      typeof password !== 'string' ||
+      typeof confirmPassword !== 'string' ||
+      !name ||
+      !email ||
+      !password ||
+      !confirmPassword
+    ) {
       return res.status(400).json({
         message: 'Name, email, password and confirm password are required.',
       });
     }
 
+    if (username !== undefined && typeof username !== 'string') {
+      return res.status(400).json({ message: 'Invalid username.' });
+    }
+
     if (password !== confirmPassword) {
       return res.status(400).json({ message: 'Passwords do not match.' });
+    }
+
+    const passwordError = getPasswordPolicyError(password);
+    if (passwordError) {
+      return res.status(400).json({ message: passwordError });
     }
 
     const RoleModel = ROLE_MODELS[role];
@@ -116,7 +141,12 @@ async function signin(req, res) {
   try {
     const { emailOrUsername, password } = req.body;
 
-    if (!emailOrUsername || !password) {
+    if (
+      typeof emailOrUsername !== 'string' ||
+      typeof password !== 'string' ||
+      !emailOrUsername ||
+      !password
+    ) {
       return res.status(400).json({
         message: 'Email/username and password are required.',
       });
@@ -130,13 +160,34 @@ async function signin(req, res) {
     });
 
     if (!user) {
-      return res.status(401).json({ message: 'User not found.' });
+      return res.status(401).json({ message: 'Invalid credentials.' });
+    }
+
+    if (user.lockUntil && user.lockUntil > new Date()) {
+      const minutesLeft = Math.ceil((user.lockUntil.getTime() - Date.now()) / 60000);
+      return res.status(423).json({
+        message: `Too many failed attempts. Please try again in ${minutesLeft} minute(s).`,
+      });
     }
 
     const isMatch = await comparePassword(password, user.passwordHash);
 
     if (!isMatch) {
+      user.failedLoginAttempts += 1;
+
+      if (user.failedLoginAttempts >= MAX_FAILED_LOGIN_ATTEMPTS) {
+        user.lockUntil = new Date(Date.now() + LOGIN_LOCK_MS);
+        user.failedLoginAttempts = 0;
+      }
+
+      await user.save();
       return res.status(401).json({ message: 'Invalid credentials.' });
+    }
+
+    if (user.failedLoginAttempts > 0 || user.lockUntil) {
+      user.failedLoginAttempts = 0;
+      user.lockUntil = null;
+      await user.save();
     }
 
     if (!user.isVerified) {
@@ -150,6 +201,7 @@ async function signin(req, res) {
       const { code, codeHash } = generateOtpCode();
       user.otpCodeHash = codeHash;
       user.otpExpires = new Date(Date.now() + OTP_TTL_MS);
+      user.otpAttempts = 0;
       await user.save();
 
       await sendOtpEmail(user.email, user.name, code);
@@ -276,6 +328,7 @@ async function requestOtp(req, res) {
     const { code, codeHash } = generateOtpCode();
     user.otpCodeHash = codeHash;
     user.otpExpires = new Date(Date.now() + OTP_TTL_MS);
+    user.otpAttempts = 0;
     await user.save();
 
     await sendOtpEmail(user.email, user.name, code);
@@ -303,14 +356,27 @@ async function verifyOtp(req, res) {
       return res.status(401).json({ message: 'Invalid or expired code.' });
     }
 
+    if (user.otpAttempts >= MAX_OTP_ATTEMPTS) {
+      user.otpCodeHash = null;
+      user.otpExpires = null;
+      user.otpAttempts = 0;
+      await user.save();
+      return res.status(401).json({
+        message: 'Too many incorrect attempts. Please request a new code.',
+      });
+    }
+
     const codeHash = hashToken(code);
 
     if (codeHash !== user.otpCodeHash) {
+      user.otpAttempts += 1;
+      await user.save();
       return res.status(401).json({ message: 'Invalid or expired code.' });
     }
 
     user.otpCodeHash = null;
     user.otpExpires = null;
+    user.otpAttempts = 0;
     await user.save();
 
     if (user.role === 'student') {
@@ -369,7 +435,14 @@ async function resetPassword(req, res) {
   try {
     const { token, newPassword, confirmNewPassword } = req.body;
 
-    if (!token || !newPassword || !confirmNewPassword) {
+    if (
+      typeof token !== 'string' ||
+      typeof newPassword !== 'string' ||
+      typeof confirmNewPassword !== 'string' ||
+      !token ||
+      !newPassword ||
+      !confirmNewPassword
+    ) {
       return res.status(400).json({
         message: 'Token, new password and confirmation are required.',
       });
@@ -377,6 +450,11 @@ async function resetPassword(req, res) {
 
     if (newPassword !== confirmNewPassword) {
       return res.status(400).json({ message: 'Passwords do not match.' });
+    }
+
+    const passwordError = getPasswordPolicyError(newPassword);
+    if (passwordError) {
+      return res.status(400).json({ message: passwordError });
     }
 
     const tokenHash = hashToken(token);
@@ -395,6 +473,10 @@ async function resetPassword(req, res) {
     user.resetPasswordExpires = null;
     user.otpCodeHash = null;
     user.otpExpires = null;
+    user.otpAttempts = 0;
+    user.failedLoginAttempts = 0;
+    user.lockUntil = null;
+    user.isVerified = true; // setting a password via an emailed token also proves email ownership
     await user.save();
 
     return res.status(200).json({ message: 'Password reset successfully. Please sign in.' });

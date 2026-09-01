@@ -11,7 +11,6 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000
 const AddTeacherModal = ({ isOpen, onClose, onCreated }: AddTeacherModalProps) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -30,7 +29,7 @@ const AddTeacherModal = ({ isOpen, onClose, onCreated }: AddTeacherModalProps) =
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email }),
       });
 
       const data = await response.json().catch(() => ({}));
@@ -41,7 +40,6 @@ const AddTeacherModal = ({ isOpen, onClose, onCreated }: AddTeacherModalProps) =
 
       setName('');
       setEmail('');
-      setPassword('');
       onCreated();
     } catch (err) {
       const message =
@@ -104,30 +102,16 @@ const AddTeacherModal = ({ isOpen, onClose, onCreated }: AddTeacherModalProps) =
             />
           </div>
 
-          <div>
-            <label
-              htmlFor="teacher-password"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Password
-            </label>
-            <input
-              type="password"
-              id="teacher-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
-              placeholder="Set a password"
-              required
-            />
-          </div>
+          <p className="text-sm text-gray-500">
+            The teacher will receive an email invite to set their own password and activate their account.
+          </p>
 
           <button
             type="submit"
             disabled={isLoading}
             className="w-full bg-purple-600 text-white py-3 rounded-md font-semibold hover:bg-purple-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {isLoading ? 'Adding...' : 'Add Teacher'}
+            {isLoading ? 'Sending invite...' : 'Send Invite'}
           </button>
         </form>
       </div>

@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const User = require('../models/User.model');
 const Teacher = require('../models/Teacher.model');
 const Student = require('../models/Student.model');
@@ -5,21 +6,34 @@ const Course = require('../models/Course.model');
 const Lecture = require('../models/Lecture.model');
 const { hashPassword } = require('../utils/hash');
 const { getPagination, buildPagination } = require('../utils/pagination');
+const { sendTeacherInviteEmail } = require('../utils/email');
+const { generateVerificationToken } = require('../utils/otp');
+
+const INVITE_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 function sanitizeUser(user) {
   if (!user) return null;
 
   const userObj = user.toObject();
   delete userObj.passwordHash;
+  delete userObj.emailVerificationTokenHash;
+  delete userObj.emailVerificationExpires;
+  delete userObj.otpCodeHash;
+  delete userObj.otpExpires;
+  delete userObj.resetPasswordTokenHash;
+  delete userObj.resetPasswordExpires;
+  delete userObj.failedLoginAttempts;
+  delete userObj.lockUntil;
+  delete userObj.otpAttempts;
   return userObj;
 }
 
 exports.createTeacher = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email } = req.body;
 
-    if (!name || !email || !password) {
-      return res.status(400).json({ message: 'Name, email and password are required.' });
+    if (!name || !email) {
+      return res.status(400).json({ message: 'Name and email are required.' });
     }
 
     const existing = await User.findOne({ email: email.toLowerCase() });
@@ -28,11 +42,20 @@ exports.createTeacher = async (req, res) => {
       return res.status(409).json({ message: 'Email is already registered.' });
     }
 
-    const passwordHash = await hashPassword(password);
-    const teacher = await Teacher.create({ name, email, passwordHash, isVerified: true });
+    // Unusable placeholder — the teacher sets their real password via the invite link.
+    const passwordHash = await hashPassword(crypto.randomBytes(32).toString('hex'));
+
+    const teacher = await Teacher.create({ name, email, passwordHash, isVerified: false });
+
+    const { rawToken, tokenHash } = generateVerificationToken();
+    teacher.resetPasswordTokenHash = tokenHash;
+    teacher.resetPasswordExpires = new Date(Date.now() + INVITE_TOKEN_TTL_MS);
+    await teacher.save();
+
+    await sendTeacherInviteEmail(teacher.email, teacher.name, rawToken);
 
     return res.status(201).json({
-      message: 'Teacher created successfully',
+      message: 'Teacher invited successfully',
       teacher: sanitizeUser(teacher),
     });
   } catch (error) {

@@ -1,5 +1,6 @@
 const User = require('../models/User.model');
 const { hashPassword, comparePassword } = require('../utils/hash');
+const { getPasswordPolicyError } = require('../utils/passwordPolicy');
 
 function sanitizeUser(user) {
   if (!user) return null;
@@ -56,7 +57,14 @@ exports.changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword, confirmNewPassword } = req.body;
 
-    if (!currentPassword || !newPassword || !confirmNewPassword) {
+    if (
+      typeof currentPassword !== 'string' ||
+      typeof newPassword !== 'string' ||
+      typeof confirmNewPassword !== 'string' ||
+      !currentPassword ||
+      !newPassword ||
+      !confirmNewPassword
+    ) {
       return res.status(400).json({
         message: 'Current password, new password and confirmation are required.',
       });
@@ -64,6 +72,11 @@ exports.changePassword = async (req, res) => {
 
     if (newPassword !== confirmNewPassword) {
       return res.status(400).json({ message: 'New passwords do not match.' });
+    }
+
+    const passwordError = getPasswordPolicyError(newPassword);
+    if (passwordError) {
+      return res.status(400).json({ message: passwordError });
     }
 
     const user = await User.findById(req.user.userId);

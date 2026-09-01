@@ -55,6 +55,22 @@ async function sendPasswordResetEmail(to, name, token) {
   });
 }
 
+async function sendTeacherInviteEmail(to, name, token) {
+  const setPasswordUrl = `${process.env.FRONTEND_URL}/set-password?token=${token}`;
+
+  await sendEmail({
+    to,
+    subject: "You've been invited to teach on EduBeacon",
+    html: `
+      <p>Hi ${name},</p>
+      <p>An admin has created a teacher account for you on EduBeacon.</p>
+      <p>Set your password to activate your account and start managing courses:</p>
+      <p><a href="${setPasswordUrl}">Set my password</a></p>
+      <p>This link expires in 7 days. If you weren't expecting this, you can ignore this email.</p>
+    `,
+  });
+}
+
 async function sendOtpEmail(to, name, code) {
   await sendEmail({
     to,
@@ -73,4 +89,5 @@ module.exports = {
   sendVerificationEmail,
   sendOtpEmail,
   sendPasswordResetEmail,
+  sendTeacherInviteEmail,
 };

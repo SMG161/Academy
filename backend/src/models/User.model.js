@@ -13,6 +13,9 @@ const userSchema = new mongoose.Schema(
     otpExpires: { type: Date, default: null },
     resetPasswordTokenHash: { type: String, default: null },
     resetPasswordExpires: { type: Date, default: null },
+    failedLoginAttempts: { type: Number, default: 0 },
+    lockUntil: { type: Date, default: null },
+    otpAttempts: { type: Number, default: 0 },
   },
   { timestamps: true, discriminatorKey: 'role' }
 );
