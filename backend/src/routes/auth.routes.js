@@ -14,6 +14,7 @@ const {
   otpVerifyLimiter,
   emailRequestLimiter,
   signupLimiter,
+  resetPasswordLimiter,
 } = require('../middleware/rateLimiters');
 
 const router = express.Router();
@@ -25,6 +26,6 @@ router.post('/resend-verification', emailRequestLimiter, resendVerification);
 router.post('/otp/request', emailRequestLimiter, requestOtp);
 router.post('/otp/verify', otpVerifyLimiter, verifyOtp);
 router.post('/forgot-password', emailRequestLimiter, forgotPassword);
-router.post('/reset-password', resetPassword);
+router.post('/reset-password', resetPasswordLimiter, resetPassword);
 
 module.exports = router;

@@ -164,12 +164,19 @@ const SignInPopup = ({ isOpen, onClose }: SignInPopupProps) => {
       const response = await fetch(`${API_BASE_URL}/api/auth/otp/request`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, password }),
       });
       const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Could not resend right now. Please try again shortly.');
+      }
+
       setOtpMessage(data.message || 'A new code has been sent to your email.');
-    } catch {
-      setOtpError('Could not resend right now. Please try again shortly.');
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Could not resend right now. Please try again shortly.';
+      setOtpError(message);
     }
   };
 

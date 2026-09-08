@@ -2,6 +2,17 @@ const { Resend } = require('resend');
 
 let resendClient = null;
 
+// User-supplied fields (e.g. name) are interpolated into these HTML email
+// bodies — escape them so a name like `<script>` can't inject markup.
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function getClient() {
   if (!process.env.RESEND_API_KEY) {
     throw new Error('RESEND_API_KEY is not set in environment variables');
@@ -32,7 +43,7 @@ async function sendVerificationEmail(to, name, token) {
     to,
     subject: 'Verify your EduBeacon email',
     html: `
-      <p>Hi ${name},</p>
+      <p>Hi ${escapeHtml(name)},</p>
       <p>Thanks for signing up for EduBeacon. Please verify your email address to activate your account.</p>
       <p><a href="${verifyUrl}">Verify my email</a></p>
       <p>This link expires in 24 hours. If you didn't create this account, you can ignore this email.</p>
@@ -47,7 +58,7 @@ async function sendPasswordResetEmail(to, name, token) {
     to,
     subject: 'Reset your EduBeacon password',
     html: `
-      <p>Hi ${name},</p>
+      <p>Hi ${escapeHtml(name)},</p>
       <p>We received a request to reset your EduBeacon password.</p>
       <p><a href="${resetUrl}">Reset my password</a></p>
       <p>This link expires in 1 hour. If you didn't request this, you can ignore this email.</p>
@@ -62,7 +73,7 @@ async function sendTeacherInviteEmail(to, name, token) {
     to,
     subject: "You've been invited to teach on EduBeacon",
     html: `
-      <p>Hi ${name},</p>
+      <p>Hi ${escapeHtml(name)},</p>
       <p>An admin has created a teacher account for you on EduBeacon.</p>
       <p>Set your password to activate your account and start managing courses:</p>
       <p><a href="${setPasswordUrl}">Set my password</a></p>
@@ -78,7 +89,7 @@ async function sendOtpEmail(to, name, code) {
     to,
     subject: `${code} is your EduBeacon login code`,
     html: `
-      <p>Hi ${name},</p>
+      <p>Hi ${escapeHtml(name)},</p>
       <p>Your EduBeacon login code is:</p>
       <p style="font-size: 28px; font-weight: bold; letter-spacing: 4px;">${code}</p>
       <p>This code expires in 10 minutes. If you didn't request this, you can ignore this email.</p>

@@ -46,9 +46,22 @@ const signupLimiter = rateLimit({
   message: { message: 'Too many accounts created from this IP. Please try again later.' },
 });
 
+// Password reset completion: 10 per 15 min per IP. The reset token itself
+// (an unguessable 256-bit value) is the real barrier here — this just
+// bounds abuse/log-spam on the endpoint, consistent with the other auth routes.
+const resetPasswordLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => ipKeyGenerator(req.ip),
+  message: { message: 'Too many attempts. Please try again later.' },
+});
+
 module.exports = {
   signinLimiter,
   otpVerifyLimiter,
   emailRequestLimiter,
   signupLimiter,
+  resetPasswordLimiter,
 };

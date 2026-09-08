@@ -77,7 +77,7 @@ const ManageStudents = () => {
             type="text"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Search any student by email..."
+            placeholder="Find a student by their exact email..."
             className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-500"
           />
         </div>
@@ -106,7 +106,9 @@ const ManageStudents = () => {
               {students.length === 0 && (
                 <tr>
                   <td colSpan={3} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                    {search ? 'No students found with that email.' : 'No students enrolled in your courses yet.'}
+                    {search
+                      ? 'No student found with that exact email.'
+                      : 'No students enrolled in your courses yet.'}
                   </td>
                 </tr>
               )}

@@ -51,9 +51,15 @@ async function issueVerificationEmail(user) {
   await sendVerificationEmail(user.email, user.name, rawToken);
 }
 
+// Public signup only ever creates students — teacher/admin accounts are
+// always provisioned through their own trusted flows (admin invite, seed
+// script). `role` is intentionally not read from the request body: if this
+// endpoint is ever extended to cover other roles, that has to be a deliberate
+// change here, not just adding an entry to ROLE_MODELS/ROLE_DEFAULTS.
 async function signup(req, res) {
   try {
-    const { name, email, username, password, confirmPassword, role = 'student' } = req.body;
+    const { name, email, username, password, confirmPassword } = req.body;
+    const role = 'student';
 
     if (
       typeof name !== 'string' ||
@@ -306,23 +312,52 @@ async function resendVerification(req, res) {
   }
 }
 
+// Re-issues an OTP (used for "resend code" on the OTP-entry screen). Requires
+// the password again — same as signin's own OTP-issuing branch — so this
+// can't be used to obtain a fresh OTP (and therefore a full login) for an
+// account without ever proving knowledge of its password.
 async function requestOtp(req, res) {
   try {
-    const { email } = req.body;
+    const { email, password } = req.body;
 
-    if (!email) {
-      return res.status(400).json({ message: 'Email is required.' });
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required.' });
     }
 
     const user = await User.findOne({ email: email.toLowerCase() });
 
     if (!user) {
-      return res.status(200).json({
-        message: 'If that account exists, a login code has been sent to it.',
+      return res.status(401).json({ message: 'Invalid credentials.' });
+    }
+
+    if (user.lockUntil && user.lockUntil > new Date()) {
+      const minutesLeft = Math.ceil((user.lockUntil.getTime() - Date.now()) / 60000);
+      return res.status(423).json({
+        message: `Too many failed attempts. Please try again in ${minutesLeft} minute(s).`,
       });
     }
 
+    const isMatch = await comparePassword(password, user.passwordHash);
+
+    if (!isMatch) {
+      user.failedLoginAttempts += 1;
+
+      if (user.failedLoginAttempts >= MAX_FAILED_LOGIN_ATTEMPTS) {
+        user.lockUntil = new Date(Date.now() + LOGIN_LOCK_MS);
+        user.failedLoginAttempts = 0;
+      }
+
+      await user.save();
+      return res.status(401).json({ message: 'Invalid credentials.' });
+    }
+
+    if (user.failedLoginAttempts > 0 || user.lockUntil) {
+      user.failedLoginAttempts = 0;
+      user.lockUntil = null;
+    }
+
     if (!user.isVerified) {
+      await user.save();
       return res.status(403).json({
         message: 'Please verify your email before signing in.',
         code: 'EMAIL_NOT_VERIFIED',
@@ -342,7 +377,7 @@ async function requestOtp(req, res) {
     }
 
     return res.status(200).json({
-      message: 'If that account exists, a login code has been sent to it.',
+      message: 'A new code has been sent to your email.',
     });
   } catch (error) {
     console.error('Request OTP error:', error);

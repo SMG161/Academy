@@ -31,9 +31,6 @@ app.use(
 
 app.use(express.json());
 
-// Serve videos
-app.use('/videos', express.static('videos'));
-
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/students', studentRoutes);
