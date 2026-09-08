@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import {
   HomeIcon,
   BookOpenIcon,
+  VideoCameraIcon,
   UserGroupIcon,
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
@@ -20,6 +21,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { id: 'home', label: 'Home', icon: HomeIcon, path: '/teacher/dashboard' },
   { id: 'manage-courses', label: 'Manage Courses', icon: BookOpenIcon, path: '/teacher/courses' },
+  { id: 'manage-lectures', label: 'Manage Lectures', icon: VideoCameraIcon, path: '/teacher/lectures' },
   { id: 'manage-students', label: 'Manage Students', icon: UserGroupIcon, path: '/teacher/students' },
 ];
 

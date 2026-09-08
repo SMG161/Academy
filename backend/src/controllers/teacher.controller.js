@@ -3,6 +3,7 @@ const Lecture = require('../models/Lecture.model');
 const Student = require('../models/Student.model');
 const { getPagination, buildPagination } = require('../utils/pagination');
 const { escapeRegex } = require('../utils/regex');
+const { withThumbnailUrl } = require('../utils/cdn');
 const {
   computeInitialNotifiedMilestones,
   notifyAccessGranted,
@@ -49,6 +50,31 @@ exports.getMyCourses = async (req, res) => {
   }
 };
 
+// Paginated list of the signed-in teacher's own lectures, across all their courses.
+exports.getMyLectures = async (req, res) => {
+  try {
+    const { page, limit, skip } = getPagination(req, { defaultLimit: 27, maxLimit: 27 });
+
+    const filter = { teacher: req.user.userId };
+
+    const [lectures, total] = await Promise.all([
+      Lecture.find(filter)
+        .select('-videoPath')
+        .populate('course', 'name')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Lecture.countDocuments(filter),
+    ]);
+
+    const items = lectures.map((lecture) => withThumbnailUrl(lecture.toObject()));
+
+    res.json({ items, pagination: buildPagination({ page, limit, total }) });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // ---- Students management ----
 
 // Paginated list of students who hold any grant (active or expired) against a
@@ -81,18 +107,21 @@ exports.getMyStudents = async (req, res) => {
   }
 };
 
-// Search ANY student by email — used to find someone to grant access to for
-// the first time, not limited to students already tied to this teacher.
+// Looks up a student by their exact email — used to find someone to grant
+// access to for the first time, not limited to students already tied to
+// this teacher. Requires an exact (case-insensitive) match rather than a
+// partial/substring search, so a teacher can't browse or enumerate the
+// student roster — they have to already know the account's real email.
 exports.searchStudents = async (req, res) => {
   try {
     const { page, limit, skip } = getPagination(req, { defaultLimit: 10, maxLimit: 25 });
-    const email = (req.query.email || '').trim();
+    const email = (req.query.email || '').trim().toLowerCase();
 
     if (!email) {
       return res.json({ items: [], pagination: buildPagination({ page, limit, total: 0 }) });
     }
 
-    const filter = { role: 'student', email: { $regex: escapeRegex(email), $options: 'i' } };
+    const filter = { role: 'student', email };
 
     const [students, total] = await Promise.all([
       Student.find(filter).select('name email createdAt').sort({ email: 1 }).skip(skip).limit(limit),

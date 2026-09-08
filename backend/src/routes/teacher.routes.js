@@ -8,6 +8,7 @@ const requireTeacher = require('../middleware/requireTeacher');
 router.use(authMiddleware, requireTeacher);
 
 router.get('/courses', teacherController.getMyCourses);
+router.get('/lectures', teacherController.getMyLectures);
 
 router.get('/students', teacherController.getMyStudents);
 router.get('/students/search', teacherController.searchStudents);

@@ -132,8 +132,9 @@ exports.getLectureById = async (req, res) => {
   }
 };
 
-// Get a short-lived, signed video URL. Access is granted if the student is
-// enrolled in the parent course, or has bought this lecture individually.
+// Get a short-lived, signed video URL. Access is granted if the requester
+// owns the lecture (or is an admin), the student is enrolled in the parent
+// course, or the student has bought this lecture individually.
 exports.getLectureVideo = async (req, res) => {
   try {
     const lecture = await Lecture.findById(req.params.id);
@@ -142,25 +143,29 @@ exports.getLectureVideo = async (req, res) => {
       return res.status(404).json({ message: 'Lecture not found' });
     }
 
-    const student = await Student.findById(req.user.userId);
-    const now = new Date();
+    const isOwner = lecture.teacher && lecture.teacher.toString() === req.user.userId;
 
-    const hasCourseAccess = Boolean(
-      student &&
-        student.courses.some(
-          (c) => c.course.toString() === lecture.course.toString() && c.expiresAt > now
-        )
-    );
+    if (!isOwner && req.user.role !== 'admin') {
+      const student = await Student.findById(req.user.userId);
+      const now = new Date();
 
-    const hasLectureAccess = Boolean(
-      student &&
-        student.lectures.some(
-          (l) => l.lecture.toString() === lecture._id.toString() && l.expiresAt > now
-        )
-    );
+      const hasCourseAccess = Boolean(
+        student &&
+          student.courses.some(
+            (c) => c.course.toString() === lecture.course.toString() && c.expiresAt > now
+          )
+      );
 
-    if (!hasCourseAccess && !hasLectureAccess) {
-      return res.status(403).json({ message: 'You do not have access to this lecture' });
+      const hasLectureAccess = Boolean(
+        student &&
+          student.lectures.some(
+            (l) => l.lecture.toString() === lecture._id.toString() && l.expiresAt > now
+          )
+      );
+
+      if (!hasCourseAccess && !hasLectureAccess) {
+        return res.status(403).json({ message: 'You do not have access to this lecture' });
+      }
     }
 
     const videoUrl = signVideoUrl(resolveCdnUrl(lecture.videoPath));
@@ -171,14 +176,21 @@ exports.getLectureVideo = async (req, res) => {
   }
 };
 
-// Whether the signed-in student has access to this lecture (course enrollment
-// or an individual lecture purchase).
+// Whether the signed-in user has access to this lecture — always true for
+// the owning teacher or an admin; otherwise course enrollment or an
+// individual lecture purchase.
 exports.getLectureAccess = async (req, res) => {
   try {
-    const lecture = await Lecture.findById(req.params.id).select('course');
+    const lecture = await Lecture.findById(req.params.id).select('course teacher');
 
     if (!lecture) {
       return res.status(404).json({ message: 'Lecture not found' });
+    }
+
+    const isOwner = lecture.teacher && lecture.teacher.toString() === req.user.userId;
+
+    if (isOwner || req.user.role === 'admin') {
+      return res.json({ hasAccess: true, expiresAt: null });
     }
 
     const student = await Student.findById(req.user.userId).select('courses lectures');

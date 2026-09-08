@@ -18,6 +18,8 @@ import Teachers from './pages/admin/Teachers';
 import TeacherDashboard from './pages/teacher/TeacherDashboard';
 import ManageCourses from './pages/teacher/ManageCourses';
 import TeacherCourseDetails from './pages/teacher/TeacherCourseDetails';
+import ManageLectures from './pages/teacher/ManageLectures';
+import TeacherLectureDetails from './pages/teacher/TeacherLectureDetails';
 import ManageStudents from './pages/teacher/ManageStudents';
 import StudentDetail from './pages/teacher/StudentDetail';
 import StudentAccountSettings from './pages/students/AccountSettings';
@@ -55,6 +57,8 @@ function App() {
           <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
           <Route path="/teacher/courses" element={<ManageCourses />} />
           <Route path="/teacher/course/:id" element={<TeacherCourseDetails />} />
+          <Route path="/teacher/lectures" element={<ManageLectures />} />
+          <Route path="/teacher/lecture/:id" element={<TeacherLectureDetails />} />
           <Route path="/teacher/students" element={<ManageStudents />} />
           <Route path="/teacher/student/:id" element={<StudentDetail />} />
           <Route path="/teacher/settings" element={<TeacherAccountSettings />} />
