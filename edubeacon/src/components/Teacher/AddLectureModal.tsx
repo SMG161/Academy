@@ -1,4 +1,7 @@
 import { type ChangeEvent, type FormEvent, useEffect, useState } from 'react';
+import { uploadThumbnail, uploadVideo } from '../../utils/mediaUpload';
+import { MAX_VIDEO_SIZE_BYTES, formatFileSize } from '../../utils/uploadLimits';
+import { captureVideoFrame } from '../../utils/videoThumbnail';
 
 interface AddLectureModalProps {
   isOpen: boolean;
@@ -8,72 +11,6 @@ interface AddLectureModalProps {
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
-
-function uploadToS3(uploadUrl: string, file: Blob, onProgress: (percent: number) => void) {
-  return new Promise<void>((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open('PUT', uploadUrl);
-    xhr.setRequestHeader('Content-Type', file.type);
-
-    xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable) {
-        onProgress(Math.round((event.loaded / event.total) * 100));
-      }
-    };
-
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) resolve();
-      else reject(new Error('Video upload failed'));
-    };
-
-    xhr.onerror = () => reject(new Error('Video upload failed'));
-
-    xhr.send(file);
-  });
-}
-
-// Grabs a frame from partway into the selected video file to use as the
-// lecture (and, if the course has none yet, course) thumbnail. Best-effort:
-// resolves to null rather than rejecting if capture isn't possible.
-function captureVideoFrame(file: File): Promise<Blob | null> {
-  return new Promise((resolve) => {
-    const video = document.createElement('video');
-    video.preload = 'metadata';
-    video.muted = true;
-    video.playsInline = true;
-    const objectUrl = URL.createObjectURL(file);
-    video.src = objectUrl;
-
-    let settled = false;
-    const finish = (blob: Blob | null) => {
-      if (settled) return;
-      settled = true;
-      URL.revokeObjectURL(objectUrl);
-      resolve(blob);
-    };
-
-    video.onloadedmetadata = () => {
-      video.currentTime = Math.min(1, (video.duration || 0) / 2);
-    };
-
-    video.onseeked = () => {
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return finish(null);
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        canvas.toBlob((blob) => finish(blob), 'image/jpeg', 0.85);
-      } catch {
-        finish(null);
-      }
-    };
-
-    video.onerror = () => finish(null);
-    setTimeout(() => finish(null), 8000);
-  });
-}
 
 const AddLectureModal = ({ isOpen, courseId, onClose, onCreated }: AddLectureModalProps) => {
   const [name, setName] = useState('');
@@ -101,6 +38,16 @@ const AddLectureModal = ({ isOpen, courseId, onClose, onCreated }: AddLectureMod
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
+
+    if (file && file.size > MAX_VIDEO_SIZE_BYTES) {
+      setError(`Video files must be ${formatFileSize(MAX_VIDEO_SIZE_BYTES)} or smaller`);
+      e.target.value = '';
+      setVideoFile(null);
+      setThumbnailBlob(null);
+      return;
+    }
+
+    setError(null);
     setVideoFile(file);
     setThumbnailBlob(null);
 
@@ -128,45 +75,18 @@ const AddLectureModal = ({ isOpen, courseId, onClose, onCreated }: AddLectureMod
     try {
       const token = localStorage.getItem('authToken');
 
-      const presignRes = await fetch(`${API_BASE_URL}/api/uploads/lecture-video`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ fileName: videoFile.name, fileType: videoFile.type }),
-      });
-
-      const presignData = await presignRes.json().catch(() => ({}));
-
-      if (!presignRes.ok) {
-        throw new Error(presignData.message || 'Failed to prepare upload');
-      }
-
-      await uploadToS3(presignData.uploadUrl, videoFile, setUploadPercent);
+      const videoPath = await uploadVideo(videoFile, token, setUploadPercent);
 
       // Best-effort: a captured video frame is a nice-to-have, never blocks
       // lecture creation if the presign or upload fails.
       let thumbnailPath: string | undefined;
       if (thumbnailBlob) {
         try {
-          const thumbPresignRes = await fetch(`${API_BASE_URL}/api/uploads/thumbnail`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              fileName: `${videoFile.name.replace(/\.[^./]+$/, '')}-thumb.jpg`,
-              fileType: 'image/jpeg',
-            }),
-          });
-          const thumbPresignData = await thumbPresignRes.json().catch(() => ({}));
-
-          if (thumbPresignRes.ok) {
-            await uploadToS3(thumbPresignData.uploadUrl, thumbnailBlob, () => {});
-            thumbnailPath = thumbPresignData.thumbnailPath;
-          }
+          thumbnailPath = await uploadThumbnail(
+            thumbnailBlob,
+            `${videoFile.name.replace(/\.[^./]+$/, '')}-thumb.jpg`,
+            token
+          );
         } catch {
           // Ignore — lecture is still created without a thumbnail.
         }
@@ -183,7 +103,7 @@ const AddLectureModal = ({ isOpen, courseId, onClose, onCreated }: AddLectureMod
           course: courseId,
           description,
           price: Number(price),
-          videoPath: presignData.videoPath,
+          videoPath,
           thumbnailPath,
         }),
       });
@@ -293,6 +213,7 @@ const AddLectureModal = ({ isOpen, courseId, onClose, onCreated }: AddLectureMod
               className="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-purple-50 file:text-purple-700 file:font-semibold hover:file:bg-purple-100 dark:text-gray-400 dark:file:bg-purple-950/40 dark:file:text-purple-300 dark:hover:file:bg-purple-900/40"
               required
             />
+            <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">Max {formatFileSize(MAX_VIDEO_SIZE_BYTES)}.</p>
 
             {isCapturingThumbnail && (
               <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">Generating thumbnail from video...</p>

@@ -7,7 +7,8 @@ const requireTeacherOrAdmin = require('../middleware/requireTeacherOrAdmin');
 
 // Protected
 router.post('/', authMiddleware, requireTeacherOrAdmin, lectureController.createLecture);
-router.delete('/:id', authMiddleware, lectureController.deleteLecture);
+router.patch('/:id', authMiddleware, requireTeacherOrAdmin, lectureController.updateLecture);
+router.delete('/:id', authMiddleware, requireTeacherOrAdmin, lectureController.deleteLecture);
 router.get('/:id/video', authMiddleware, lectureController.getLectureVideo);
 router.get('/:id/access', authMiddleware, lectureController.getLectureAccess);
 

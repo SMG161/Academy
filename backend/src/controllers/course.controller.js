@@ -35,6 +35,46 @@ exports.createCourse = async (req, res) => {
   }
 };
 
+// Update course
+exports.updateCourse = async (req, res) => {
+  try {
+    const { name, price, description, thumbnailPath } = req.body;
+
+    if (!name || price === undefined) {
+      return res.status(400).json({ message: 'Name and price are required' });
+    }
+
+    const course = await Course.findById(req.params.id);
+
+    if (!course) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+
+    const isOwner = course.teacher && course.teacher.toString() === req.user.userId;
+    if (!isOwner && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'You do not have permission to edit this course' });
+    }
+
+    // thumbnailPath must come from this teacher's own presigned upload namespace.
+    if (thumbnailPath && req.user.role !== 'admin' && !thumbnailPath.startsWith(`thumbnails/${req.user.userId}/`)) {
+      return res.status(403).json({ message: 'Invalid thumbnailPath' });
+    }
+
+    course.name = name;
+    course.price = price;
+    course.description = description || '';
+    if (thumbnailPath) {
+      course.thumbnailPath = thumbnailPath;
+    }
+
+    await course.save();
+
+    res.json(sanitizeCourse(course));
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Get all courses (paginated)
 exports.getAllCourses = async (req, res) => {
   try {
@@ -116,11 +156,18 @@ exports.getCourseAccess = async (req, res) => {
 // Delete course
 exports.deleteCourse = async (req, res) => {
   try {
-    const course = await Course.findByIdAndDelete(req.params.id);
+    const course = await Course.findById(req.params.id);
 
     if (!course) {
       return res.status(404).json({ message: 'Course not found' });
     }
+
+    const isOwner = course.teacher && course.teacher.toString() === req.user.userId;
+    if (!isOwner && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'You do not have permission to delete this course' });
+    }
+
+    await course.deleteOne();
 
     res.json({ message: 'Course deleted successfully' });
   } catch (error) {

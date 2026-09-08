@@ -1,4 +1,6 @@
 import { type ChangeEvent, type FormEvent, useState } from 'react';
+import { uploadThumbnail } from '../../utils/mediaUpload';
+import { MAX_IMAGE_SIZE_BYTES, formatFileSize } from '../../utils/uploadLimits';
 
 interface AddCourseModalProps {
   isOpen: boolean;
@@ -19,7 +21,17 @@ const AddCourseModal = ({ isOpen, onClose, onCreated }: AddCourseModalProps) => 
   if (!isOpen) return null;
 
   const handleThumbnailChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setThumbnailFile(e.target.files?.[0] || null);
+    const file = e.target.files?.[0] || null;
+
+    if (file && file.size > MAX_IMAGE_SIZE_BYTES) {
+      setError(`Thumbnail images must be ${formatFileSize(MAX_IMAGE_SIZE_BYTES)} or smaller`);
+      e.target.value = '';
+      setThumbnailFile(null);
+      return;
+    }
+
+    setError(null);
+    setThumbnailFile(file);
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -32,32 +44,7 @@ const AddCourseModal = ({ isOpen, onClose, onCreated }: AddCourseModalProps) => 
 
       let thumbnailPath: string | undefined;
       if (thumbnailFile) {
-        const presignRes = await fetch(`${API_BASE_URL}/api/uploads/thumbnail`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ fileName: thumbnailFile.name, fileType: thumbnailFile.type }),
-        });
-
-        const presignData = await presignRes.json().catch(() => ({}));
-
-        if (!presignRes.ok) {
-          throw new Error(presignData.message || 'Failed to prepare thumbnail upload');
-        }
-
-        const uploadRes = await fetch(presignData.uploadUrl, {
-          method: 'PUT',
-          headers: { 'Content-Type': thumbnailFile.type },
-          body: thumbnailFile,
-        });
-
-        if (!uploadRes.ok) {
-          throw new Error('Thumbnail upload failed');
-        }
-
-        thumbnailPath = presignData.thumbnailPath;
+        thumbnailPath = await uploadThumbnail(thumbnailFile, thumbnailFile.name, token);
       }
 
       const response = await fetch(`${API_BASE_URL}/api/courses`, {
@@ -172,7 +159,7 @@ const AddCourseModal = ({ isOpen, onClose, onCreated }: AddCourseModalProps) => 
               className="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-purple-50 file:text-purple-700 file:font-semibold hover:file:bg-purple-100 dark:text-gray-400 dark:file:bg-purple-950/40 dark:file:text-purple-300 dark:hover:file:bg-purple-900/40"
             />
             <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">
-              If left blank, a frame from the first uploaded lecture will be used once available.
+              Max {formatFileSize(MAX_IMAGE_SIZE_BYTES)}. If left blank, a frame from the first uploaded lecture will be used once available.
             </p>
           </div>
 

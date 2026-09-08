@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeftIcon, ChevronRightIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { ChevronLeftIcon, ChevronRightIcon, MagnifyingGlassIcon, PencilIcon } from '@heroicons/react/24/outline';
 import TeacherLayout from '../../components/Teacher/layout/TeacherLayout';
 import AddCourseModal from '../../components/Teacher/AddCourseModal';
+import EditCourseModal from '../../components/Teacher/EditCourseModal';
 import type { TeacherCourseSummary } from '../../types/course';
 import type { Pagination } from '../../types/pagination';
 
@@ -19,6 +20,7 @@ const ManageCourses = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingCourseId, setEditingCourseId] = useState<string | null>(null);
 
   // Debounce the search box before it hits the API and resets to page 1.
   useEffect(() => {
@@ -100,9 +102,21 @@ const ManageCourses = () => {
             <div
               key={course._id}
               onClick={() => navigate(`/teacher/course/${course._id}`)}
-              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all dark:bg-gray-900 dark:border-gray-700"
+              className="relative bg-white rounded-2xl shadow-sm border border-gray-100 p-6 cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all dark:bg-gray-900 dark:border-gray-700"
             >
-              <h3 className="text-lg font-semibold text-gray-900 line-clamp-1 dark:text-gray-100">{course.name}</h3>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setEditingCourseId(course._id);
+                }}
+                title="Edit course"
+                className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-purple-600 transition-colors dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-purple-400"
+              >
+                <PencilIcon className="h-4 w-4" />
+              </button>
+
+              <h3 className="text-lg font-semibold text-gray-900 line-clamp-1 pr-8 dark:text-gray-100">{course.name}</h3>
               <p className="text-gray-500 text-sm mt-1 line-clamp-2 min-h-[2.5rem] dark:text-gray-400">
                 {course.description || 'No description added yet.'}
               </p>
@@ -160,6 +174,18 @@ const ManageCourses = () => {
           fetchCourses(page, search);
         }}
       />
+
+      {editingCourseId && (
+        <EditCourseModal
+          isOpen={Boolean(editingCourseId)}
+          courseId={editingCourseId}
+          onClose={() => setEditingCourseId(null)}
+          onUpdated={() => {
+            setEditingCourseId(null);
+            fetchCourses(page, search);
+          }}
+        />
+      )}
     </TeacherLayout>
   );
 };

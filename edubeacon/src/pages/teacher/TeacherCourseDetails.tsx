@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { VideoCameraIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, VideoCameraIcon } from '@heroicons/react/24/outline';
 import TeacherLayout from '../../components/Teacher/layout/TeacherLayout';
 import AddLectureModal from '../../components/Teacher/AddLectureModal';
+import EditCourseModal from '../../components/Teacher/EditCourseModal';
+import EditLectureModal from '../../components/Teacher/EditLectureModal';
 import { decodeToken } from '../../utils/jwt';
 import type { LectureSummary } from '../../types/lecture';
 
@@ -23,6 +25,8 @@ const TeacherCourseDetails = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditingCourse, setIsEditingCourse] = useState(false);
+  const [editingLectureId, setEditingLectureId] = useState<string | null>(null);
 
   const fetchCourse = useCallback(async () => {
     setIsLoading(true);
@@ -59,14 +63,28 @@ const TeacherCourseDetails = () => {
   return (
     <TeacherLayout>
       <div className="space-y-8">
-        <div>
-          <h1 className="text-4xl lg:text-5xl font-bold leading-tight text-gray-900 dark:text-gray-100">
-            {course.name}
-          </h1>
-          <p className="text-purple-600 font-semibold mt-2 dark:text-purple-400">Rs. {course.price}</p>
-          <p className="text-gray-600 mt-4 max-w-3xl dark:text-gray-400">
-            {course.description || 'No description added yet.'}
-          </p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-4xl lg:text-5xl font-bold leading-tight text-gray-900 dark:text-gray-100">
+              {course.name}
+            </h1>
+            <p className="text-purple-600 font-semibold mt-2 dark:text-purple-400">Rs. {course.price}</p>
+            <p className="text-gray-600 mt-4 max-w-3xl dark:text-gray-400">
+              {course.description || 'No description added yet.'}
+            </p>
+          </div>
+
+          {canManage && (
+            <button
+              type="button"
+              onClick={() => setIsEditingCourse(true)}
+              title="Edit course"
+              className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full border border-gray-300 text-sm text-gray-600 hover:bg-gray-100 hover:text-purple-600 transition-colors dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-purple-400"
+            >
+              <PencilIcon className="h-4 w-4" />
+              Edit
+            </button>
+          )}
         </div>
 
         <div className="w-full bg-white rounded-xl shadow-md divide-y divide-gray-100 dark:bg-gray-900 dark:divide-gray-800">
@@ -83,7 +101,19 @@ const TeacherCourseDetails = () => {
                 <VideoCameraIcon className="h-5 w-5 text-purple-600 flex-shrink-0 dark:text-purple-400" />
                 <span className="text-gray-900 font-medium dark:text-gray-100">{lecture.name}</span>
               </div>
-              <span className="text-sm text-gray-500 flex-shrink-0 dark:text-gray-400">Rs. {lecture.price}</span>
+              <div className="flex items-center gap-3 flex-shrink-0">
+                <span className="text-sm text-gray-500 dark:text-gray-400">Rs. {lecture.price}</span>
+                {canManage && (
+                  <button
+                    type="button"
+                    onClick={() => setEditingLectureId(lecture._id)}
+                    title="Edit lecture"
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-purple-600 transition-colors dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-purple-400"
+                  >
+                    <PencilIcon className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -108,6 +138,30 @@ const TeacherCourseDetails = () => {
           onClose={() => setIsModalOpen(false)}
           onCreated={() => {
             setIsModalOpen(false);
+            fetchCourse();
+          }}
+        />
+      )}
+
+      {canManage && (
+        <EditCourseModal
+          isOpen={isEditingCourse}
+          courseId={course._id}
+          onClose={() => setIsEditingCourse(false)}
+          onUpdated={() => {
+            setIsEditingCourse(false);
+            fetchCourse();
+          }}
+        />
+      )}
+
+      {canManage && editingLectureId && (
+        <EditLectureModal
+          isOpen={Boolean(editingLectureId)}
+          lectureId={editingLectureId}
+          onClose={() => setEditingLectureId(null)}
+          onUpdated={() => {
+            setEditingLectureId(null);
             fetchCourse();
           }}
         />

@@ -68,6 +68,53 @@ exports.createLecture = async (req, res) => {
   }
 };
 
+// Update lecture. Video/thumbnail are optional — omit them to keep the
+// lecture's existing video/thumbnail unchanged.
+exports.updateLecture = async (req, res) => {
+  try {
+    const { name, description, price, videoPath, thumbnailPath } = req.body;
+
+    if (!name || price === undefined) {
+      return res.status(400).json({ message: 'Name and price are required' });
+    }
+
+    const lecture = await Lecture.findById(req.params.id);
+
+    if (!lecture) {
+      return res.status(404).json({ message: 'Lecture not found' });
+    }
+
+    const isOwner = lecture.teacher && lecture.teacher.toString() === req.user.userId;
+    if (!isOwner && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'You do not have permission to edit this lecture' });
+    }
+
+    if (videoPath) {
+      if (req.user.role !== 'admin' && !videoPath.startsWith(`lectures/${req.user.userId}/`)) {
+        return res.status(403).json({ message: 'Invalid videoPath' });
+      }
+      lecture.videoPath = videoPath;
+    }
+
+    if (thumbnailPath) {
+      if (req.user.role !== 'admin' && !thumbnailPath.startsWith(`thumbnails/${req.user.userId}/`)) {
+        return res.status(403).json({ message: 'Invalid thumbnailPath' });
+      }
+      lecture.thumbnailPath = thumbnailPath;
+    }
+
+    lecture.name = name;
+    lecture.description = description || '';
+    lecture.price = price;
+
+    await lecture.save();
+
+    res.json(sanitizeLecture(lecture));
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Get lecture by ID
 exports.getLectureById = async (req, res) => {
   try {
@@ -160,12 +207,18 @@ exports.getLectureAccess = async (req, res) => {
 // Delete lecture
 exports.deleteLecture = async (req, res) => {
   try {
-    const lecture = await Lecture.findByIdAndDelete(req.params.id);
+    const lecture = await Lecture.findById(req.params.id);
 
     if (!lecture) {
       return res.status(404).json({ message: 'Lecture not found' });
     }
 
+    const isOwner = lecture.teacher && lecture.teacher.toString() === req.user.userId;
+    if (!isOwner && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'You do not have permission to delete this lecture' });
+    }
+
+    await lecture.deleteOne();
     await Course.findByIdAndUpdate(lecture.course, { $pull: { lectures: lecture._id } });
 
     res.json({ message: 'Lecture deleted successfully' });
