@@ -25,7 +25,7 @@ const LegalLayout = ({ title, lastUpdated, children }: LegalLayoutProps) => {
         </div>
       </main>
 
-      <Footer />
+      <Footer onSignInClick={() => navigate('/')} onSignUpClick={() => navigate('/')} />
     </div>
   );
 };

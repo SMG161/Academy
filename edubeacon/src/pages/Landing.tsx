@@ -16,7 +16,10 @@ const Landing = () => {
         onSignUpClick={() => setIsSignUpOpen(true)}
       />
       <Hero onEnrollNowClick={() => setIsSignUpOpen(true)} />
-      <Footer />
+      <Footer
+        onSignInClick={() => setIsSignInOpen(true)}
+        onSignUpClick={() => setIsSignUpOpen(true)}
+      />
       <SignInPopup 
         isOpen={isSignInOpen} 
         onClose={() => setIsSignInOpen(false)} 
