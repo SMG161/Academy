@@ -57,8 +57,16 @@ const Footer = () => {
             <p className="text-gray-400">Phone: +1 (555) 123-4567</p>
           </div>
         </div>
-        <div className="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
+        <div className="border-t border-gray-700 mt-8 pt-6 flex flex-col sm:flex-row items-center justify-center gap-3 text-center text-gray-400">
           <p>&copy; 2024 EduBeacon. All rights reserved.</p>
+          <span className="hidden sm:inline">&middot;</span>
+          <Link to="/terms" className="hover:text-yellow-400 transition-colors">
+            Terms of Service
+          </Link>
+          <span className="hidden sm:inline">&middot;</span>
+          <Link to="/privacy" className="hover:text-yellow-400 transition-colors">
+            Privacy Policy
+          </Link>
         </div>
       </div>
     </footer>

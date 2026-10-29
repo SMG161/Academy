@@ -1,4 +1,5 @@
 import { type FormEvent, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 interface SignUpPopupProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ const SignUpPopup = ({ isOpen, onClose }: SignUpPopupProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
@@ -31,6 +33,7 @@ const SignUpPopup = ({ isOpen, onClose }: SignUpPopupProps) => {
     setEmail('');
     setPassword('');
     setConfirmPassword('');
+    setTermsAccepted(false);
     setError(null);
     onClose();
   };
@@ -50,6 +53,11 @@ const SignUpPopup = ({ isOpen, onClose }: SignUpPopupProps) => {
       return;
     }
 
+    if (!termsAccepted) {
+      setError('You must agree to the Terms of Service and Privacy Policy to continue.');
+      return;
+    }
+
     setError(null);
     setIsLoading(true);
 
@@ -64,6 +72,7 @@ const SignUpPopup = ({ isOpen, onClose }: SignUpPopupProps) => {
           email,
           password,
           confirmPassword,
+          termsAccepted,
         }),
       });
 
@@ -184,6 +193,37 @@ const SignUpPopup = ({ isOpen, onClose }: SignUpPopupProps) => {
               placeholder="Confirm your password"
               required
             />
+          </div>
+
+          <div className="flex items-start gap-2">
+            <input
+              type="checkbox"
+              id="termsAccepted"
+              checked={termsAccepted}
+              onChange={(e) => setTermsAccepted(e.target.checked)}
+              className="mt-1 h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-600 dark:border-gray-600 dark:bg-gray-800"
+            />
+            <label htmlFor="termsAccepted" className="text-sm text-gray-600 dark:text-gray-400">
+              I agree to the{' '}
+              <Link
+                to="/terms"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-purple-600 dark:text-purple-400 hover:underline"
+              >
+                Terms of Service
+              </Link>{' '}
+              and{' '}
+              <Link
+                to="/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-purple-600 dark:text-purple-400 hover:underline"
+              >
+                Privacy Policy
+              </Link>
+              .
+            </label>
           </div>
 
           <button

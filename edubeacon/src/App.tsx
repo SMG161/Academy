@@ -4,6 +4,8 @@ import Landing from './pages/Landing';
 import VerifyEmail from './pages/VerifyEmail';
 import ResetPassword from './pages/ResetPassword';
 import SetPassword from './pages/SetPassword';
+import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
 import StudentProtectedRoute from './components/StudentProtectedRoute';
 import AdminProtectedRoute from './components/AdminProtectedRoute';
 import TeacherProtectedRoute from './components/TeacherProtectedRoute';
@@ -34,6 +36,8 @@ function App() {
         <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/set-password" element={<SetPassword />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
 
         {/* Protected student routes */}
         <Route element={<StudentProtectedRoute />}>
