@@ -58,10 +58,24 @@ const resetPasswordLimiter = rateLimit({
   message: { message: 'Too many attempts. Please try again later.' },
 });
 
+// Upload presign (video/thumbnail): 30 per 15 min per authenticated user.
+// These routes are already authenticated + role-checked; this just bounds
+// how many presigned S3 PUT URLs one account can mint in a window, so a
+// compromised/malicious teacher token can't be used to run up S3 costs.
+const uploadPresignLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => (req.user && req.user.userId) || ipKeyGenerator(req.ip),
+  message: { message: 'Too many upload requests. Please try again later.' },
+});
+
 module.exports = {
   signinLimiter,
   otpVerifyLimiter,
   emailRequestLimiter,
   signupLimiter,
   resetPasswordLimiter,
+  uploadPresignLimiter,
 };
