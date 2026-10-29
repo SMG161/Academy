@@ -6,9 +6,10 @@ const Privacy = () => {
   return (
     <LegalLayout title="Privacy Policy" lastUpdated="September 2026">
       <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-        This Privacy Policy explains what information EduBeacon ("we", "us") collects when you
-        use EduBeacon (the "Service"), why we collect it, and who else sees it. It applies to
-        students, teachers, and administrators.
+        This Privacy Policy explains what information we collect when you use EduBeacon (the
+        "Service"), why we collect it, and who else sees it. EduBeacon is owned and operated by
+        Gilani School System ("we", "us"). This Policy applies to students, teachers, and
+        administrators.
       </p>
 
       <LegalSection heading="1. Information we collect">
@@ -104,7 +105,8 @@ const Privacy = () => {
 
       <LegalSection heading="9. Contact">
         <p>
-          Questions about this Privacy Policy, or requests about your data, can be sent to{' '}
+          Questions about this Privacy Policy, or requests about your data, can be sent to Gilani
+          School System, the operator of EduBeacon, at{' '}
           <a href="mailto:legal@edubeacon.com" className="text-purple-600 dark:text-purple-400 hover:underline">
             legal@edubeacon.com
           </a>

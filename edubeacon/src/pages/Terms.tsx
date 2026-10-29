@@ -7,9 +7,9 @@ const Terms = () => {
     <LegalLayout title="Terms of Service" lastUpdated="September 2026">
       <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
         These Terms of Service ("Terms") govern your access to and use of EduBeacon (the
-        "Service"), operated by EduBeacon ("EduBeacon", "we", "us"). By creating an account or
-        otherwise using the Service, you agree to these Terms. If you do not agree, please do not
-        use the Service.
+        "Service"), which is owned and operated by Gilani School System ("we", "us"). By creating
+        an account or otherwise using the Service, you agree to these Terms. If you do not agree,
+        please do not use the Service.
       </p>
 
       <LegalSection heading="1. Who can use EduBeacon">
@@ -45,7 +45,7 @@ const Terms = () => {
       <LegalSection heading="3. Content on the Service">
         <p>
           Teachers retain ownership of the courses, lectures, videos, and other material they
-          upload ("Teacher Content"). By uploading Teacher Content, a teacher grants EduBeacon a
+          upload ("Teacher Content"). By uploading Teacher Content, a teacher grants us a
           license to host, store, and stream that content to students who have been granted
           access, solely for the purpose of operating the Service.
         </p>
@@ -90,7 +90,7 @@ const Terms = () => {
 
       <LegalSection heading="6. Disclaimers">
         <p>
-          The Service and all course and lecture content are provided "as is." EduBeacon does not
+          The Service and all course and lecture content are provided "as is." We do not
           guarantee the accuracy, completeness, or educational outcome of any Teacher Content, and
           is not responsible for the conduct of teachers or students. We do not guarantee that the
           Service will be uninterrupted, error-free, or available at all times.
@@ -99,7 +99,7 @@ const Terms = () => {
 
       <LegalSection heading="7. Limitation of liability">
         <p>
-          To the fullest extent permitted by law, EduBeacon will not be liable for any indirect,
+          To the fullest extent permitted by law, we will not be liable for any indirect,
           incidental, or consequential damages arising from your use of, or inability to use, the
           Service, including loss of access to purchased content due to an expired or revoked
           grant.
@@ -124,7 +124,8 @@ const Terms = () => {
 
       <LegalSection heading="10. Contact">
         <p>
-          Questions about these Terms can be sent to{' '}
+          Questions about these Terms can be sent to Gilani School System, the operator of
+          EduBeacon, at{' '}
           <a href="mailto:legal@edubeacon.com" className="text-purple-600 dark:text-purple-400 hover:underline">
             legal@edubeacon.com
           </a>
