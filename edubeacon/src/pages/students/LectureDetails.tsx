@@ -1,6 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { MediaPlayer, MediaProvider } from '@vidstack/react';
+import {
+  MediaPlayer,
+  MediaProvider,
+  type MediaPlayerInstance,
+  type MediaTimeUpdateEventDetail,
+} from '@vidstack/react';
 import { DefaultVideoLayout, defaultLayoutIcons } from '@vidstack/react/player/layouts/default';
 import '@vidstack/react/player/styles/default/theme.css';
 import '@vidstack/react/player/styles/default/layouts/video.css';
@@ -8,6 +13,7 @@ import StudentLayout from '../../components/Student/layout/StudentLayout';
 import type { Lecture } from '../../types/lecture';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+const PROGRESS_SAVE_INTERVAL_MS = 10000;
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
@@ -21,6 +27,12 @@ const LectureDetails = () => {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
+
+  const playerRef = useRef<MediaPlayerInstance>(null);
+  const resumePositionRef = useRef(0);
+  const hasSeekedRef = useRef(false);
+  const lastPositionRef = useRef(0);
+  const lastSavedAtRef = useRef(0);
 
   useEffect(() => {
     const fetchLecture = async () => {
@@ -77,7 +89,7 @@ const LectureDetails = () => {
     const token = localStorage.getItem('authToken');
     if (!token) return;
 
-    const fetchVideoUrl = async () => {
+    const fetchVideoAndProgress = async () => {
       try {
         const res = await fetch(`${API_BASE_URL}/api/lectures/${id}/video`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -90,11 +102,70 @@ const LectureDetails = () => {
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Something went wrong';
         setError(message);
+        return;
+      }
+
+      try {
+        const progressRes = await fetch(`${API_BASE_URL}/api/lectures/${id}/progress`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const progressData = await progressRes.json().catch(() => ({}));
+
+        if (progressRes.ok && progressData.positionSeconds > 0) {
+          resumePositionRef.current = progressData.positionSeconds;
+        }
+      } catch {
+        // Resuming from a saved position is a nice-to-have — just start from 0 if this fails.
       }
     };
 
-    fetchVideoUrl();
+    fetchVideoAndProgress();
   }, [hasAccess, id]);
+
+  const saveProgress = (positionSeconds: number) => {
+    const token = localStorage.getItem('authToken');
+    if (!token || !id || positionSeconds <= 0) return;
+
+    fetch(`${API_BASE_URL}/api/lectures/${id}/progress`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({
+        positionSeconds,
+        durationSeconds: playerRef.current?.duration || undefined,
+      }),
+    }).catch(() => {
+      // Best-effort — losing one progress save isn't worth surfacing to the viewer.
+    });
+  };
+
+  // Save one last time if the viewer navigates away mid-lecture.
+  useEffect(() => {
+    return () => {
+      saveProgress(lastPositionRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  const handleCanPlay = () => {
+    if (!hasSeekedRef.current && resumePositionRef.current > 0 && playerRef.current) {
+      playerRef.current.currentTime = resumePositionRef.current;
+      hasSeekedRef.current = true;
+    }
+  };
+
+  const handleTimeUpdate = (detail: MediaTimeUpdateEventDetail) => {
+    lastPositionRef.current = detail.currentTime;
+
+    const now = Date.now();
+    if (now - lastSavedAtRef.current >= PROGRESS_SAVE_INTERVAL_MS) {
+      lastSavedAtRef.current = now;
+      saveProgress(detail.currentTime);
+    }
+  };
+
+  const handlePause = () => {
+    saveProgress(lastPositionRef.current);
+  };
 
   if (isLoading) return <p className="text-gray-600 dark:text-gray-400 p-6">Loading lecture...</p>;
   if (error) return <p className="text-red-600 dark:text-red-400 p-6">{error}</p>;
@@ -122,11 +193,15 @@ const LectureDetails = () => {
             <div className="flex-1">
               {videoUrl ? (
                 <MediaPlayer
+                  ref={playerRef}
                   title={lecture.name}
                   src={videoUrl}
                   viewType="video"
                   streamType="on-demand"
                   playsInline
+                  onCanPlay={handleCanPlay}
+                  onTimeUpdate={handleTimeUpdate}
+                  onPause={handlePause}
                   className="w-full h-80 lg:h-[450px] rounded-lg overflow-hidden shadow-2xl"
                 >
                   <MediaProvider />

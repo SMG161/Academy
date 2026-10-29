@@ -5,6 +5,8 @@ interface CourseCardItem {
   name: string;
   teacher?: { name: string } | null;
   price: number;
+  subject?: string;
+  grade?: string;
   lectures?: { _id: string }[];
   thumbnailUrl?: string | null;
 }
@@ -43,6 +45,21 @@ const CourseCard = ({ course, onClick }: CourseCardProps) => {
         <p className="text-gray-500 dark:text-gray-400 text-sm mt-0.5">
           {course.teacher?.name || 'Unidentified teacher'}
         </p>
+
+        {(course.subject || (course.grade && course.grade !== 'None')) && (
+          <div className="flex items-center gap-1.5 mt-2">
+            {course.subject && (
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
+                {course.subject}
+              </span>
+            )}
+            {course.grade && course.grade !== 'None' && (
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
+                {course.grade.length <= 2 ? `Grade ${course.grade}` : course.grade}
+              </span>
+            )}
+          </div>
+        )}
 
         <div className="mt-3 flex items-center justify-between">
           <span className="text-gray-900 dark:text-gray-100 font-semibold text-sm">

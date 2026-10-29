@@ -176,6 +176,35 @@ exports.getLectureVideo = async (req, res) => {
   }
 };
 
+const PREVIEW_SECONDS = 5 * 60;
+
+// Issues a signed video URL with no auth or access check at all — this is
+// the free preview shown to logged-out visitors. Strictly scoped to the
+// first lecture of its course (course.lectures[0]), so this can never be
+// used to reach any other, paid lecture's video. The 5-minute cap itself
+// is enforced client-side by the preview player, not here.
+exports.getLecturePreview = async (req, res) => {
+  try {
+    const lecture = await Lecture.findById(req.params.id).select('course videoPath');
+
+    if (!lecture) {
+      return res.status(404).json({ message: 'Lecture not found' });
+    }
+
+    const course = await Course.findById(lecture.course).select('lectures');
+
+    if (!course || !course.lectures.length || course.lectures[0].toString() !== lecture._id.toString()) {
+      return res.status(403).json({ message: 'This lecture is not available for preview' });
+    }
+
+    const videoUrl = signVideoUrl(resolveCdnUrl(lecture.videoPath));
+
+    res.json({ videoUrl, previewSeconds: PREVIEW_SECONDS });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Whether the signed-in user has access to this lecture — always true for
 // the owning teacher or an admin; otherwise course enrollment or an
 // individual lecture purchase.

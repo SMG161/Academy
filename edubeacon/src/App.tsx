@@ -6,6 +6,8 @@ import ResetPassword from './pages/ResetPassword';
 import SetPassword from './pages/SetPassword';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
+import PublicCourses from './pages/PublicCourses';
+import PublicCourseDetails from './pages/PublicCourseDetails';
 import StudentProtectedRoute from './components/StudentProtectedRoute';
 import AdminProtectedRoute from './components/AdminProtectedRoute';
 import TeacherProtectedRoute from './components/TeacherProtectedRoute';
@@ -38,6 +40,8 @@ function App() {
         <Route path="/set-password" element={<SetPassword />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
+        <Route path="/courses" element={<PublicCourses />} />
+        <Route path="/courses/:id" element={<PublicCourseDetails />} />
 
         {/* Protected student routes */}
         <Route element={<StudentProtectedRoute />}>

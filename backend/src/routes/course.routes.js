@@ -13,6 +13,7 @@ router.get('/:id/access', authMiddleware, courseController.getCourseAccess);
 
 // Public
 router.get('/', courseController.getAllCourses);
+router.get('/filters', courseController.getCourseFilters);
 router.get('/:id', courseController.getCourseById);
 
 module.exports = router;

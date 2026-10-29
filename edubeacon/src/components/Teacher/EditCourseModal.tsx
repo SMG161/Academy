@@ -1,6 +1,7 @@
 import { type ChangeEvent, type FormEvent, useEffect, useState } from 'react';
 import { uploadThumbnail } from '../../utils/mediaUpload';
 import { MAX_IMAGE_SIZE_BYTES, formatFileSize } from '../../utils/uploadLimits';
+import { GRADE_OPTIONS } from '../../utils/grades';
 
 interface EditCourseModalProps {
   isOpen: boolean;
@@ -15,6 +16,8 @@ const EditCourseModal = ({ isOpen, courseId, onClose, onUpdated }: EditCourseMod
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
   const [description, setDescription] = useState('');
+  const [subject, setSubject] = useState('');
+  const [grade, setGrade] = useState('None');
   const [currentThumbnailUrl, setCurrentThumbnailUrl] = useState<string | null>(null);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [isFetching, setIsFetching] = useState(false);
@@ -37,6 +40,8 @@ const EditCourseModal = ({ isOpen, courseId, onClose, onUpdated }: EditCourseMod
         setName(data.name || '');
         setPrice(String(data.price ?? ''));
         setDescription(data.description || '');
+        setSubject(data.subject || '');
+        setGrade(data.grade || 'None');
         setCurrentThumbnailUrl(data.thumbnailUrl || null);
         setThumbnailFile(null);
       } catch (err) {
@@ -85,7 +90,7 @@ const EditCourseModal = ({ isOpen, courseId, onClose, onUpdated }: EditCourseMod
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ name, price: Number(price), description, thumbnailPath }),
+        body: JSON.stringify({ name, price: Number(price), description, subject, grade, thumbnailPath }),
       });
 
       const data = await response.json().catch(() => ({}));
@@ -159,6 +164,40 @@ const EditCourseModal = ({ isOpen, courseId, onClose, onUpdated }: EditCourseMod
                 step="0.01"
                 required
               />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="edit-course-subject" className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
+                  Subject <span className="text-gray-400 font-normal dark:text-gray-500">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  id="edit-course-subject"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-500"
+                  placeholder="e.g. Mathematics"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="edit-course-grade" className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
+                  Grade
+                </label>
+                <select
+                  id="edit-course-grade"
+                  value={grade}
+                  onChange={(e) => setGrade(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
+                >
+                  {GRADE_OPTIONS.map((option) => (
+                    <option key={option} value={option}>
+                      {option === 'None' ? 'No grade' : option}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <div>

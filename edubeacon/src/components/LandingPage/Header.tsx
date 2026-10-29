@@ -13,7 +13,7 @@ const Header = ({ onSignInClick, onSignUpClick }: HeaderProps) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <Link to="/" className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-              Education
+              EduBeacon
             </Link>
           </div>
           <nav className="hidden md:flex items-center space-x-6">
@@ -29,8 +29,8 @@ const Header = ({ onSignInClick, onSignUpClick }: HeaderProps) => {
             <Link to="/" className="text-gray-700 hover:text-purple-600 transition-colors dark:text-gray-300 dark:hover:text-purple-400">
               Services
             </Link>
-            <Link to="/" className="text-gray-700 hover:text-purple-600 transition-colors dark:text-gray-300 dark:hover:text-purple-400">
-              Course
+            <Link to="/courses" className="text-gray-700 hover:text-purple-600 transition-colors dark:text-gray-300 dark:hover:text-purple-400">
+              Courses
             </Link>
             <Link to="/" className="text-gray-700 hover:text-purple-600 transition-colors dark:text-gray-300 dark:hover:text-purple-400">
               Blog

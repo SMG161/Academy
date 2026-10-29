@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { GRADE_OPTIONS } = require('../utils/grades');
 
 const courseSchema = new mongoose.Schema(
   {
@@ -12,6 +13,21 @@ const courseSchema = new mongoose.Schema(
       type: String,
       default: '',
       trim: true,
+    },
+
+    // Free-text subject/category (e.g. "Mathematics", "Physics"). The Browse
+    // Courses filter dropdown is populated from whatever values are
+    // actually in use, rather than a fixed taxonomy, so this stays flexible.
+    subject: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+
+    grade: {
+      type: String,
+      enum: GRADE_OPTIONS,
+      default: 'None',
     },
 
     teacher: {

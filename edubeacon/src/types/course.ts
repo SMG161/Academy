@@ -4,8 +4,10 @@ export interface Course {
   _id: string;
   name: string;
   description?: string;
-  teacher?: { name: string } | null;
+  teacher?: { _id?: string; name: string } | null;
   price: number;
+  subject?: string;
+  grade?: string;
   lectures?: LectureSummary[];
   thumbnailUrl?: string | null;
 }

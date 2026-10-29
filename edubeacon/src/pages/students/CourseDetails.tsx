@@ -85,6 +85,13 @@ const CourseDetails = () => {
           <p className="text-gray-600 dark:text-gray-400 mt-2">
             {course.teacher?.name || 'Unidentified teacher'}
           </p>
+          {(course.subject || (course.grade && course.grade !== 'None')) && (
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              {[course.subject, course.grade && course.grade !== 'None' ? `Grade ${course.grade}` : null]
+                .filter(Boolean)
+                .join(' · ')}
+            </p>
+          )}
           {access?.isEnrolledInCourse && access.courseExpiresAt && (
             <p className="text-sm text-purple-600 dark:text-purple-400 mt-1">
               Access expires on {formatDate(access.courseExpiresAt)}
