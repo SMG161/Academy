@@ -16,6 +16,16 @@ const userSchema = new mongoose.Schema(
     failedLoginAttempts: { type: Number, default: 0 },
     lockUntil: { type: Date, default: null },
     otpAttempts: { type: Number, default: 0 },
+    termsAcceptedAt: { type: Date, default: null },
+    // Set when the account is deactivated (self-service or admin action).
+    // Teachers/admins stay deactivated indefinitely — other students may
+    // still depend on a teacher's courses/lectures. Deactivated students are
+    // permanently purged by a background sweep (see jobs/studentPurge.js).
+    deactivatedAt: { type: Date, default: null },
+    // Bumped whenever existing sessions should stop working immediately
+    // (deactivation, password change) — checked against a JWT's `iat` claim
+    // in authMiddleware, since a JWT itself can't be revoked directly.
+    sessionsInvalidatedAt: { type: Date, default: null },
   },
   { timestamps: true, discriminatorKey: 'role' }
 );

@@ -92,11 +92,48 @@ exports.changePassword = async (req, res) => {
     }
 
     user.passwordHash = await hashPassword(newPassword);
+    user.sessionsInvalidatedAt = new Date(); // sign out any other existing sessions
     await user.save();
 
     return res.status(200).json({ message: 'Password updated successfully.' });
   } catch (error) {
     console.error('Change password error:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Deactivates the signed-in user's own account. Teachers/admins stay
+// deactivated indefinitely (reactivation is a manual admin action for now);
+// deactivated students are permanently purged after a grace period by a
+// background sweep. Signs the account out everywhere immediately.
+exports.deactivateMe = async (req, res) => {
+  try {
+    const { password } = req.body;
+
+    if (typeof password !== 'string' || !password) {
+      return res.status(400).json({ message: 'Your password is required to deactivate your account.' });
+    }
+
+    const user = await User.findById(req.user.userId);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    const isMatch = await comparePassword(password, user.passwordHash);
+
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Current password is incorrect.' });
+    }
+
+    const now = new Date();
+    user.deactivatedAt = now;
+    user.sessionsInvalidatedAt = now;
+    await user.save();
+
+    return res.status(200).json({ message: 'Your account has been deactivated.' });
+  } catch (error) {
+    console.error('Deactivate account error:', error);
     return res.status(500).json({ message: 'Internal server error' });
   }
 };

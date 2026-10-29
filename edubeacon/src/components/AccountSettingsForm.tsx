@@ -26,6 +26,11 @@ const AccountSettingsForm = () => {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [isSavingPassword, setIsSavingPassword] = useState(false);
 
+  const [deactivatePassword, setDeactivatePassword] = useState('');
+  const [deactivateConfirmed, setDeactivateConfirmed] = useState(false);
+  const [deactivateError, setDeactivateError] = useState<string | null>(null);
+  const [isDeactivating, setIsDeactivating] = useState(false);
+
   const authHeaders = () => {
     const token = localStorage.getItem('authToken');
     return { Authorization: `Bearer ${token}` };
@@ -114,6 +119,38 @@ const AccountSettingsForm = () => {
       setPasswordError(message);
     } finally {
       setIsSavingPassword(false);
+    }
+  };
+
+  const handleDeactivate = async (e: FormEvent) => {
+    e.preventDefault();
+    setDeactivateError(null);
+
+    if (!deactivateConfirmed) {
+      setDeactivateError('Please confirm you understand before continuing.');
+      return;
+    }
+
+    setIsDeactivating(true);
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/account/deactivate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({ password: deactivatePassword }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) throw new Error(data.message || 'Failed to deactivate account.');
+
+      // Full reload, not just a route change: clears every bit of cached
+      // state tied to the now-invalid session, not just the current page.
+      localStorage.removeItem('authToken');
+      window.location.href = '/';
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Something went wrong';
+      setDeactivateError(message);
+      setIsDeactivating(false);
     }
   };
 
@@ -235,6 +272,59 @@ const AccountSettingsForm = () => {
           </button>
         </form>
       </section>
+
+      {account.role !== 'admin' && (
+        <section className="bg-white dark:bg-gray-900 rounded-2xl border border-red-200 dark:border-red-900/50 shadow-sm p-6">
+          <h2 className="text-lg font-semibold text-red-700 dark:text-red-400 mb-2">Danger Zone</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            {account.role === 'teacher'
+              ? 'Deactivating your account signs you out everywhere immediately and disables sign-in. Your courses and lectures stay intact, and students who already have access keep it. Contact support to reactivate.'
+              : 'Deactivating your account signs you out everywhere immediately and disables sign-in. Your account and data are permanently deleted once your course and lecture access has expired, or 30 days after deactivation — whichever is later. Contact support if you change your mind before then.'}
+          </p>
+
+          {deactivateError && <p className="text-sm text-red-600 dark:text-red-400 mb-3">{deactivateError}</p>}
+
+          <form onSubmit={handleDeactivate} className="space-y-4">
+            <div>
+              <label
+                htmlFor="deactivatePassword"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
+                Confirm your password
+              </label>
+              <input
+                type="password"
+                id="deactivatePassword"
+                value={deactivatePassword}
+                onChange={(e) => setDeactivatePassword(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                required
+              />
+            </div>
+
+            <div className="flex items-start gap-2">
+              <input
+                type="checkbox"
+                id="deactivateConfirmed"
+                checked={deactivateConfirmed}
+                onChange={(e) => setDeactivateConfirmed(e.target.checked)}
+                className="mt-1 h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500 dark:border-gray-600 dark:bg-gray-800"
+              />
+              <label htmlFor="deactivateConfirmed" className="text-sm text-gray-600 dark:text-gray-400">
+                I understand this will sign me out of all devices immediately.
+              </label>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isDeactivating || !deactivateConfirmed}
+              className="bg-red-600 text-white px-5 py-2.5 rounded-full font-semibold hover:bg-red-700 transition-colors shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {isDeactivating ? 'Deactivating...' : 'Deactivate my account'}
+            </button>
+          </form>
+        </section>
+      )}
     </div>
   );
 };

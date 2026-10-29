@@ -8,5 +8,6 @@ router.use(authMiddleware);
 router.get('/me', accountController.getMe);
 router.patch('/me', accountController.updateMe);
 router.patch('/password', accountController.changePassword);
+router.post('/deactivate', accountController.deactivateMe);
 
 module.exports = router;

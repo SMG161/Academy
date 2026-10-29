@@ -58,7 +58,7 @@ async function issueVerificationEmail(user) {
 // change here, not just adding an entry to ROLE_MODELS/ROLE_DEFAULTS.
 async function signup(req, res) {
   try {
-    const { name, email, username, password, confirmPassword } = req.body;
+    const { name, email, username, password, confirmPassword, termsAccepted } = req.body;
     const role = 'student';
 
     if (
@@ -73,6 +73,12 @@ async function signup(req, res) {
     ) {
       return res.status(400).json({
         message: 'Name, email, password and confirm password are required.',
+      });
+    }
+
+    if (termsAccepted !== true) {
+      return res.status(400).json({
+        message: 'You must agree to the Terms of Service and Privacy Policy to create an account.',
       });
     }
 
@@ -119,6 +125,7 @@ async function signup(req, res) {
       username,
       passwordHash,
       isVerified: false,
+      termsAcceptedAt: new Date(),
       ...(ROLE_DEFAULTS[role] || {}),
     });
 
@@ -194,6 +201,13 @@ async function signin(req, res) {
       user.failedLoginAttempts = 0;
       user.lockUntil = null;
       await user.save();
+    }
+
+    if (user.deactivatedAt) {
+      return res.status(403).json({
+        message: 'This account has been deactivated. Contact support if you believe this is a mistake.',
+        code: 'ACCOUNT_DEACTIVATED',
+      });
     }
 
     if (!user.isVerified) {
@@ -356,6 +370,14 @@ async function requestOtp(req, res) {
       user.lockUntil = null;
     }
 
+    if (user.deactivatedAt) {
+      await user.save();
+      return res.status(403).json({
+        message: 'This account has been deactivated. Contact support if you believe this is a mistake.',
+        code: 'ACCOUNT_DEACTIVATED',
+      });
+    }
+
     if (!user.isVerified) {
       await user.save();
       return res.status(403).json({
@@ -421,6 +443,13 @@ async function verifyOtp(req, res) {
     user.otpExpires = null;
     user.otpAttempts = 0;
     await user.save();
+
+    if (user.deactivatedAt) {
+      return res.status(403).json({
+        message: 'This account has been deactivated. Contact support if you believe this is a mistake.',
+        code: 'ACCOUNT_DEACTIVATED',
+      });
+    }
 
     if (user.role === 'student') {
       await user.populate('courses');
@@ -520,6 +549,7 @@ async function resetPassword(req, res) {
     user.failedLoginAttempts = 0;
     user.lockUntil = null;
     user.isVerified = true; // setting a password via an emailed token also proves email ownership
+    user.sessionsInvalidatedAt = new Date(); // sign out any existing sessions
     await user.save();
 
     return res.status(200).json({ message: 'Password reset successfully. Please sign in.' });
